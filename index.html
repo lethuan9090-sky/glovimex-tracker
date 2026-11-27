@@ -172,7 +172,7 @@
     </div>
   </header>
 
-  <!-- THÔNG BÁO TOAST NHẸ -->
+  <!-- THÔNG BÁO TOAST NHẸ (THAY THẾ ALERT) -->
   <div id="toastBanner" class="fixed bottom-4 right-4 z-50 hidden max-w-sm bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2.5">
     <span id="toastIcon">✅</span>
     <span id="toastText">Đã cập nhật dữ liệu</span>
@@ -236,24 +236,11 @@
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-50 text-purple-800 border border-purple-200">
               <span class="w-2 h-2 rounded-full bg-purple-700"></span> Đóng cont
             </span>
-            <button
-              id="openFullCalendarBtn"
-              type="button"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold shadow-2xs transition cursor-pointer"
-              title="Mở lịch toàn màn hình để xem đầy đủ nội dung sự kiện"
-            >
-              <span>⛶</span>
-              <span>Xem lịch toàn màn hình</span>
-            </button>
           </div>
         </div>
 
         <div id="twoMonthCalendarContainer" class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5">
           <!-- Render bằng JS -->
-        </div>
-
-        <div id="calendarDayDetailBox" class="hidden mt-4 p-3.5 rounded-xl bg-blue-50/80 border border-blue-200 text-xs sm:text-sm">
-          <!-- Render chi tiết sự kiện khi bấm vào ô ngày -->
         </div>
       </div>
 
@@ -296,12 +283,14 @@
           </div>
         </div>
 
+        <!-- Bảng Ma trận tiến độ -->
         <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200">
           <div id="progressMatrixContainer">
             <!-- Render bằng JS -->
           </div>
         </div>
 
+        <!-- Hộp cảnh báo chậm tiến độ -->
         <div id="delayAlertContainer" class="mt-5">
           <!-- Render bằng JS -->
         </div>
@@ -398,6 +387,7 @@
             </p>
           </div>
 
+          <!-- Bộ chuyển chế độ xem Lịch tuần / Lịch từng ngày -->
           <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 self-start sm:self-auto">
             <button
               id="modeBothBtn"
@@ -426,6 +416,7 @@
           </div>
         </div>
 
+        <!-- Khối Lịch tuần (Tuần này & Tuần tới) -->
         <div id="weeklyOverviewBlock" class="mb-6">
           <h3 class="text-sm sm:text-base font-bold text-slate-800 mb-2.5 flex items-center gap-2">
             <span class="w-2 h-5 rounded-full bg-blue-700 inline-block"></span>
@@ -436,12 +427,14 @@
           </div>
         </div>
 
+        <!-- Khối Lịch từng ngày (Thứ 2 - Thứ 6) -->
         <div id="dailyScheduleBlock">
           <h3 class="text-sm sm:text-base font-bold text-slate-800 mb-2.5 flex items-center gap-2">
             <span class="w-2 h-5 rounded-full bg-amber-500 inline-block"></span>
             <span>Lịch từng ngày (Thứ 2 – Thứ 6)</span>
           </h3>
 
+          <!-- Bảng trên màn hình lớn + Thẻ trên mobile -->
           <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200">
             <div id="dailyScheduleContainer">
               <!-- Render bằng JS -->
@@ -452,81 +445,6 @@
     </section>
 
   </main>
-
-  <!-- MODAL LỊCH TOÀN MÀN HÌNH -->
-  <div id="fullCalendarModal" class="fixed inset-0 z-50 hidden flex-col bg-slate-900/75 backdrop-blur-xs p-2 sm:p-4">
-    <div class="bg-white rounded-2xl w-full h-full max-w-[1600px] mx-auto border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
-      <div class="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 py-3 bg-blue-950 text-white shrink-0">
-        <div class="flex items-center gap-2.5">
-          <span class="text-lg">📆</span>
-          <div>
-            <h3 class="text-sm sm:text-base font-extrabold tracking-tight">LỊCH ĐI XƯỞNG THÁNG 11 & THÁNG 12 / 2026 (TOÀN MÀN HÌNH)</h3>
-            <p class="text-[11px] text-blue-200">Hiển thị đầy đủ nội dung các sự kiện Inline, Final, Đóng cont theo từng ngày</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-500/20 text-sky-200 border border-sky-400/30 text-[11px] font-semibold">Inline</span>
-          <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/20 text-rose-200 border border-rose-400/30 text-[11px] font-semibold">Final</span>
-          <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/20 text-purple-200 border border-purple-400/30 text-[11px] font-semibold">Đóng cont</span>
-          <button
-            id="closeFullCalendarModalBtn"
-            type="button"
-            class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 transition cursor-pointer"
-          >
-            <span>✕</span>
-            <span>Thu nhỏ (ESC)</span>
-          </button>
-        </div>
-      </div>
-
-      <div id="fullCalendarModalBody" class="flex-1 overflow-y-auto p-3 sm:p-5 bg-slate-50">
-        <div id="fullTwoMonthCalendarContainer" class="grid grid-cols-1 2xl:grid-cols-2 gap-4 sm:gap-6">
-          <!-- Render bằng JS -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL SỬA LINK DỮ LIỆU NGUỒN -->
-  <div id="sourceLinksModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4">
-    <div class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden">
-      <div class="flex items-center justify-between px-4 sm:px-5 py-3.5 bg-slate-900 text-white">
-        <div class="flex items-center gap-2">
-          <span>🔗</span>
-          <h3 class="text-sm sm:text-base font-bold">Sửa link dữ liệu nguồn (Google Drive / Sheet)</h3>
-        </div>
-        <button id="closeSourceLinksModalBtn" type="button" class="text-slate-300 hover:text-white text-lg font-bold px-2 cursor-pointer">✕</button>
-      </div>
-
-      <div class="p-4 sm:p-5 space-y-3">
-        <p class="text-xs text-slate-600 leading-relaxed">
-          Dán trực tiếp link thư mục/file Google Drive hoặc Google Sheet thật của từng xưởng vào ô tương ứng bên dưới rồi bấm <strong>✓ Lưu link nguồn</strong> (không cần sửa JSON).
-        </p>
-
-        <div id="sourceLinksEditorList" class="space-y-2.5 max-h-[55vh] overflow-y-auto pr-1">
-          <!-- Render bằng JS -->
-        </div>
-
-        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-          <button
-            id="cancelSourceLinksModalBtn"
-            type="button"
-            class="text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 cursor-pointer"
-          >
-            Hủy
-          </button>
-          <button
-            id="saveSourceLinksBtn"
-            type="button"
-            class="text-xs font-bold px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white shadow-sm cursor-pointer"
-          >
-            ✓ Lưu link nguồn
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL NHẬP / DÁN DỮ LIỆU TỪ GMAIL HOẶC JSON -->
   <div id="jsonModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4">
     <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden">
@@ -590,7 +508,6 @@
 
   <script>
     const STORAGE_KEY = "GLOVIMEX_QC_REPORT_DATA_V1";
-    const APPS_SCRIPT_URL_KEY = "GLOVIMEX_APPS_SCRIPT_URL_V1";
 
     /**
      * DỮ LIỆU MẪU CHUẨN NGÀY 27/11/2026 (KHỚP BÁO CÁO GLOVIMEX)
@@ -599,11 +516,11 @@
       reportDate: "Thứ Sáu, ngày 27/11/2026",
       todayISO: "2026-11-27",
       sourceLinks: [
-       { label: "AN - Share", url: "https://docs.google.com/spreadsheets/d/1AwMQ-LMv0H0FJXj8t5lTaM_6LvgS8rn0AnuT2VQJvJU/edit?usp=drive_link" },
-        { label: "VNH - Share", url: "https://docs.google.com/spreadsheets/d/1XWX0tK5jlzQosCe0vb9ERcsxF3WIh8FwYIGW_N-Bdbk/edit?usp=drive_link" },
-        { label: "LTU - Share", url: "https://docs.google.com/spreadsheets/d/138XMiod5vhoAE9tyoIb7MbQKDBdFgacOxyWtOGXX0-Y/edit?usp=drive_link" },
-        { label: "CQ - Share", url: "https://docs.google.com/spreadsheets/d/1XxMKZg8b2lqkznPOYKo8H3V5jGoOUmsz4x7CrQXHI5s/edit?usp=drive_link" },
-        { label: "Xưởng lẻ", url: "https://docs.google.com/spreadsheets/d/1NR9nNf7oNxP6iFWpCiLBXRmBNIkKkZLx7BIz4YpFUZQ/edit?usp=drive_link" }
+        { label: "AN - Share", url: "https://drive.google.com/drive/folders/AN-Share" },
+        { label: "VNH - Share", url: "https://drive.google.com/drive/folders/VNH-Share" },
+        { label: "LTU - Share", url: "https://drive.google.com/drive/folders/LTU-Share" },
+        { label: "CQ - Share", url: "https://drive.google.com/drive/folders/CQ-Share" },
+        { label: "Xưởng lẻ", url: "https://drive.google.com/drive/folders/Xuong-le" }
       ],
       factories: ["AN", "LTU", "VNH", "CQ", "A.CẢNH", "Hùng TT", "A Cảnh", "A Tước"],
       factoryColors: {
@@ -625,15 +542,15 @@
           contDate: "-",
           remainingDays: "-5d",
           isDelayed: true,
-          delaySummary: "VNH Đơn 26.12 (T- = -5d): chưa làm bao bì, các mã khung sắt chậm",
+          delaySummary: "Xưởng VNH (Đơn 26.12) (Dự kiến giao 22/11) [T- = -5d]: Chậm tiến độ — Đơn hàng bị chậm tiến độ đến cuối tháng 11 mới vào đủ hàng. Lý do: Khung sắt bị chậm.",
           delayAlerts: [
             {
               factory: "VNH",
               orderCode: "Đơn 26.12",
               tMinus: "-5d",
-              deliveryText: "giao 22/11/2026",
-              detail: "25/11: xưởng chưa làm bao bì. Chú ý giục bao bì, packing; 19/11: các mã khung sắt chậm",
-              statusLabel: "Cần giục bao bì, packing & tiến độ khung sắt gấp"
+              deliveryText: "Dự kiến giao 22/11",
+              detail: "Chậm tiến độ",
+              statusLabel: "Đơn hàng bị chậm tiến độ đến cuối tháng 11 mới vào đủ hàng. Lý do: Khung sắt bị chậm."
             }
           ],
           progressByFactory: {
@@ -658,7 +575,7 @@
                 { text: "25/11 còn 300 đèn đay và khinh khí cầu chưa về xưởng", highlight: false },
                 { text: "26/11: đã đủ 100% hàng thô về xưởng", highlight: true }
               ],
-              prevNotes: "Đơn trước giao đúng lịch, bao bì giữ nguyên quy cách chuẩn.",
+              prevNotes: "mã ngôi nhà cửa số đan sai mẫu, mã khinh khí cầu đan kín sai mẫu. mã đèn cối hơi kích thùng đơn sau tăng từ 72 lên 75cm.",
               notes: "-"
             },
             {
@@ -675,7 +592,7 @@
                 { text: "19/11: Các mã khung sắt chậm nên hàng cuối tháng mới vào đủ hàng thô.", highlight: false },
                 { text: "25/11: xưởng chưa làm bao bì. Chú ý giục bao bì, packing.", highlight: true }
               ],
-              prevNotes: "Cần đối chiếu số lượng khung sắt với đơn 26.11/26.15 để tránh nhầm mã.",
+              prevNotes: "-",
               notes: "-"
             },
             {
@@ -691,7 +608,7 @@
                 { text: "29/10: đã gửi thông tin làm bao bì.", highlight: false },
                 { text: "23/11: đã về đủ hàng thô 100%", highlight: true }
               ],
-              prevNotes: "-",
+              prevNotes: "thùng mã hộp gập bị kích thùng, đơn sau tăng thêm dài, rộng.",
               notes: "-"
             },
             {
@@ -736,6 +653,7 @@
                 { text: "04/11: 2 mã tỏi đang cho đan, 3 mã khế chưa xì khung sắt.", highlight: false },
                 { text: "Nghĩa báo ngày 28/11 đủ hàng về xưởng.", highlight: true }
               ],
+              prevNotes: "AN Đơn hàng tình trạng bị xuống màu vàng nhiều và bị mốc đen.",
               notes: "1) Shipping mark sale gửi sau..\n2) Hàng đóng chồng lên nhau, bọc giấy+túi nilon. Thùng gấp gọn chuyển kèm cont.\n3) Đóng cont xong kẹp chì tạm.\n4) Chốt sớm CBM để đặt thêm hàng."
             }
           ]
@@ -745,8 +663,8 @@
           customer: "BARCELONA LED",
           tMinus: 15,
           deliveryDate: "12/12/2026",
-          contDate: "12/12/2026",
-          remainingDays: "15d",
+          contDate: "-",
+          remainingDays: "-",
           isDelayed: false,
           delaySummary: "-",
           delayAlerts: [],
@@ -768,6 +686,7 @@
                 { text: "20/11: gửi thông tin bao bì cho xưởng làm.", highlight: false },
                 { text: "23/11: đủ 2 mã đèn tăm và tua rua, mã đèn nấm được 1500 cái.", highlight: true }
               ],
+              prevNotes: "-",
               notes: "1) Chia 3 lần đóng cont, 3cont/lần • Lần 1: 12/12/2026 • Lần 2: 27/12/2026 • Lần 3: 11/01/2027\n2) Tag giấy nâu 10x6cm cho LM172,LM179,LM180.\n3) Dán 1 decal A4 các mã LM 172,LM179,LM180.\n4) Mã LM178 đóng 1pcs/ctn, in shipping mark A4 lên 1 mặt, không cần treo tag.\n5) Sau khi đóng lần 2, chốt lại số lượng thừa thiếu LM178 để sx thêm bớt."
             },
             {
@@ -785,6 +704,7 @@
                 { text: "Xưởng báo 05/12 đủ hàng và có bao bì", highlight: false },
                 { text: "07/12 check tiến độ bao bì về xưởng.", highlight: true }
               ],
+              prevNotes: "-",
               notes: "-"
             }
           ]
@@ -815,6 +735,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "-"
             },
             {
@@ -827,6 +748,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "-"
             },
             {
@@ -839,6 +761,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "-"
             }
           ]
@@ -868,6 +791,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "• Đóng gói quà 4pcs/set theo quy cách khách gửi"
             },
             {
@@ -880,6 +804,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "-"
             }
           ]
@@ -910,6 +835,7 @@
               tracking: [
                 { text: "Đã hoàn tất các đợt Inline/Final/Đóng cont trước đó của lô GR8.2.", highlight: true }
               ],
+              prevNotes: "-",
               notes: "-"
             }
           ]
@@ -938,6 +864,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "-"
             }
           ]
@@ -968,6 +895,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "-"
             },
             {
@@ -980,6 +908,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "-"
             },
             {
@@ -992,6 +921,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "-"
             }
           ]
@@ -1020,6 +950,7 @@
               inline: "-",
               final: "-",
               tracking: [],
+              prevNotes: "-",
               notes: "-"
             }
           ]
@@ -1341,19 +1272,29 @@
       });
     }
 
+    function normalizeOrderFlags(dataObj) {
+      if (!dataObj || !Array.isArray(dataObj.orders)) return dataObj;
+      dataObj.orders.forEach(order => {
+        const alerts = Array.isArray(order.delayAlerts) ? order.delayAlerts : [];
+        const hasDelayText = order.delaySummary && order.delaySummary.trim() !== "" && order.delaySummary.trim() !== "-";
+        order.isDelayed = Boolean(alerts.length > 0 || hasDelayText);
+      });
+      return dataObj;
+    }
+
     function loadInitialData() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.orders)) {
-            return { ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed };
+            return normalizeOrderFlags({ ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed });
           }
         }
       } catch (e) {
         // Bỏ qua lỗi đọc localStorage và dùng dữ liệu mặc định
       }
-      return JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA));
+      return normalizeOrderFlags(JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)));
     }
 
     function saveDataToStorage(dataObj) {
@@ -1364,129 +1305,9 @@
       }
     }
 
-   function loadAppsScriptUrl() {
-  try {
-    return localStorage.getItem(APPS_SCRIPT_URL_KEY) || "https://script.google.com/macros/s/AKfycbzBUL5GU4vwCztG1wMnHXNTFqSbGgteUXIz66gwvacLvBB50j7gndTkUNzhqwcvPZADHA/exec";
-  } catch (e) {
-    return "https://script.google.com/macros/s/AKfycbzBUL5GU4vwCztG1wMnHXNTFqSbGgteUXIz66gwvacLvBB50j7gndTkUNzhqwcvPZADHA/exec";
-  }
-}
-
-    function saveAppsScriptUrl(urlStr) {
-      try {
-        if (urlStr) {
-          localStorage.setItem(APPS_SCRIPT_URL_KEY, urlStr.trim());
-        } else {
-          localStorage.removeItem(APPS_SCRIPT_URL_KEY);
-        }
-      } catch (e) {
-        // Bỏ qua nếu bộ nhớ bị chặn
-      }
-    }
-
     /**
-     * TẢI DỮ LIỆU TỰ ĐỘNG TỪ LINK APPS SCRIPT WEB APP (/exec)
-     */
-    async function fetchFromAppsScriptUrl(scriptUrl, showSuccessToast = true) {
-      const cleanUrl = (scriptUrl || "").trim();
-      if (!cleanUrl) {
-        throw new Error("Vui lòng nhập đường link Web App của Apps Script (dạng .../exec).");
-      }
-
-      const response = await fetch(cleanUrl, { method: "GET", cache: "no-store" });
-      if (!response.ok) {
-        throw new Error(`Không thể tải dữ liệu từ Apps Script (mã lỗi ${response.status}).`);
-      }
-
-      const textBody = await response.text();
-      const parsedPayload = JSON.parse(textBody);
-
-      const nextData = Array.isArray(parsedPayload.orders)
-        ? { ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsedPayload }
-        : parseGmailOrJsonInput(JSON.stringify(parsedPayload));
-
-      if (parsedPayload.reportDate && !Array.isArray(parsedPayload.orders)) {
-        nextData.reportDate = parsedPayload.reportDate;
-      }
-
-      appState.data = nextData;
-      saveDataToStorage(nextData);
-      appState.expandedOrderIds = new Set(appState.data.orders.slice(0, 3).map(o => o.id));
-      renderAll();
-
-      if (showSuccessToast) {
-        showToast("Đã tải dữ liệu mới nhất từ Apps Script!", "⚡");
-      }
-
-      return nextData;
-    }
-
-    /**
-     * CHUYỂN ĐỔI PAYLOAD TỪ APPS SCRIPT ({ reportDate, emailSubject, rawExcerpt }) SANG CẤU TRÚC APP
-     */
-    function buildReportDataFromScriptPayload(payloadObj) {
-      const nextData = JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA));
-
-      if (payloadObj.reportDate) {
-        nextData.reportDate = String(payloadObj.reportDate).trim();
-      } else if (payloadObj.emailSubject) {
-        nextData.reportDate = String(payloadObj.emailSubject).trim();
-      }
-
-      const excerptText = String(payloadObj.rawExcerpt || "");
-      const lines = excerptText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-
-      const knownCustomers = ["EDGE", "IROVY", "BARCELONA LED", "ASIAN DESIGN HOUSE", "MRS.ALICE", "GR8", "BEACHX PRIVATE LIMITED", "GRUPO", "DIXNEUF"];
-      const knownFactories = ["AN", "LTU", "VNH", "CQ", "Hùng TT", "A Cảnh", "A Tước"];
-
-      let activeOrder = null;
-      let activeFactoryDetail = null;
-
-      lines.forEach(line => {
-        const upperLine = line.toUpperCase();
-        const matchedCustomer = knownCustomers.find(cust => upperLine.includes(cust));
-        if (matchedCustomer) {
-          const foundOrder = nextData.orders.find(o => o.customer.toUpperCase() === matchedCustomer);
-          if (foundOrder) {
-            activeOrder = foundOrder;
-            activeFactoryDetail = foundOrder.factoryDetails[0] || null;
-          }
-        }
-
-        const facMatch = line.match(/\b(AN|LTU|VNH|CQ|Hùng TT|A Cảnh|A Tước)\b/);
-        if (facMatch && activeOrder) {
-          const facCode = facMatch[1];
-          const detail = activeOrder.factoryDetails.find(fd => fd.factory === facCode);
-          if (detail) {
-            activeFactoryDetail = detail;
-          }
-          const pctMatch = line.match(/(\d{1,3})\s*%/);
-          if (pctMatch && knownFactories.includes(facCode)) {
-            const pctVal = Math.min(100, Math.max(0, parseInt(pctMatch[1], 10)));
-            activeOrder.progressByFactory[facCode] = pctVal;
-            if (detail) detail.progress = `${pctVal}%`;
-          }
-        }
-
-        if (/^\d{1,2}\/\d{1,2}\b/.test(line) || /trễ|chậm|bao bì|hàng thô|đóng cont|packing/i.test(line)) {
-          if (activeFactoryDetail) {
-            const isUrgent = /trễ|chậm|khẩn|gấp|chưa làm|thiếu|mốc/i.test(line);
-            activeFactoryDetail.tracking = [
-              { text: line, highlight: isUrgent },
-              ...(activeFactoryDetail.tracking || []).slice(0, 5)
-            ];
-            if (isUrgent && activeOrder) {
-              activeOrder.isDelayed = true;
-            }
-          }
-        }
-      });
-
-      return nextData;
-    }
-
-    /**
-     * PHÂN TÍCH NỘI DUNG DÁN TỪ GMAIL (JSON, PAYLOAD APPS SCRIPT, HTML EMAIL HOẶC VĂN BẢN)
+     * PHÂN TÍCH NỘI DUNG DÁN TỪ GMAIL (JSON, HTML EMAIL HOẶC VĂN BẢN)
+     * Tách riêng phần cảnh báo chậm tiến độ, theo dõi đơn hàng, lưu ý đơn trước & ghi chú.
      */
     function parseGmailOrJsonInput(rawText) {
       const trimmed = (rawText || "").trim();
@@ -1494,44 +1315,148 @@
         throw new Error("Vui lòng dán nội dung báo cáo từ Gmail hoặc JSON.");
       }
 
+      // 1. Thử parse JSON trực tiếp
       if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
         const parsed = JSON.parse(trimmed);
-        if (parsed && Array.isArray(parsed.orders)) {
-          return { ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed };
+        if (!parsed || !Array.isArray(parsed.orders)) {
+          throw new Error("JSON phải là một đối tượng có trường 'orders' dạng mảng.");
         }
-        if (parsed && (typeof parsed.rawExcerpt === "string" || typeof parsed.emailSubject === "string" || typeof parsed.reportDate === "string")) {
-          return buildReportDataFromScriptPayload(parsed);
-        }
-        throw new Error("JSON cần có trường 'orders' dạng mảng hoặc dữ liệu báo cáo từ Apps Script ('rawExcerpt' / 'reportDate').");
+        return normalizeOrderFlags({ ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed });
       }
 
-      let plainText = trimmed;
+      const nextData = JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA));
+
+      // 2. Nếu có HTML từ Gmail, parse cấu trúc từng bảng/khối để tách đúng cột & mục
       if (/<[a-z][\s\S]*>/i.test(trimmed)) {
         const doc = new DOMParser().parseFromString(trimmed, "text/html");
-        plainText = (doc.body && doc.body.innerText) ? doc.body.innerText : trimmed.replace(/<[^>]+>/g, " ");
+        const bodyText = (doc.body && doc.body.innerText) ? doc.body.innerText : "";
+        const dateMatch = bodyText.match(/(Thứ\s+[A-Za-zÀ-ỹ]+,\s*ngày\s*\d{1,2}\/\d{1,2}\/\d{4})/i);
+        if (dateMatch) {
+          nextData.reportDate = dateMatch[1];
+        }
+
+        // Reset cảnh báo chậm tiến độ trước khi đọc từ khối cảnh báo báo cáo
+        nextData.orders.forEach(o => {
+          o.delayAlerts = [];
+          o.delaySummary = "-";
+          o.isDelayed = false;
+        });
+
+        // Đọc khối cảnh báo chậm tiến độ sản xuất (chỉ thuộc mục tiến độ đơn hàng)
+        const alertBoxes = Array.from(doc.querySelectorAll("div")).filter(el =>
+          /Cảnh báo chậm tiến độ sản xuất/i.test(el.textContent || "") && el.querySelectorAll("li").length > 0
+        );
+
+        alertBoxes.forEach(box => {
+          box.querySelectorAll("li").forEach(li => {
+            const rawLi = (li.innerText || "").trim();
+            if (!rawLi) return;
+            const facMatch = rawLi.match(/Xưởng\s+([A-Za-zÀ-ỹ.\s]+?)\s*\(([^)]+)\)/i);
+            const tMatch = rawLi.match(/\[T-\s*=\s*([^\]]+)\]/i);
+            const arrowMatch = rawLi.match(/➔\s*([\s\S]+)$/);
+
+            const alertObj = {
+              factory: facMatch ? facMatch[1].trim() : "VNH",
+              orderCode: facMatch ? facMatch[2].trim() : "",
+              tMinus: tMatch ? tMatch[1].trim() : "",
+              deliveryText: (rawLi.match(/\((Dự kiến giao[^)]+)\)/i) || ["", ""])[1],
+              detail: "Chậm tiến độ",
+              statusLabel: arrowMatch ? arrowMatch[1].trim() : rawLi
+            };
+
+            const targetOrder = nextData.orders.find(o =>
+              o.factoryDetails.some(fd =>
+                fd.factory.toLowerCase() === alertObj.factory.toLowerCase() &&
+                (!alertObj.orderCode || fd.orderCode.toLowerCase().includes(alertObj.orderCode.toLowerCase()))
+              )
+            ) || nextData.orders[0];
+
+            if (targetOrder) {
+              targetOrder.delayAlerts.push(alertObj);
+              targetOrder.delaySummary = rawLi.replace(/\s+/g, " ").trim();
+              targetOrder.isDelayed = true;
+            }
+          });
+        });
+
+        // Đọc các bảng theo dõi đơn hàng (có cột "Theo dõi đơn hàng", "Lưu ý đơn trước", "Ghi chú")
+        const tables = Array.from(doc.querySelectorAll("table"));
+        tables.forEach(tbl => {
+          const headerText = (tbl.rows[0] && tbl.rows[0].innerText) ? tbl.rows[0].innerText : "";
+          if (!/Theo dõi đơn hàng/i.test(headerText) || !/Lưu ý đơn trước/i.test(headerText)) {
+            return;
+          }
+
+          let currentCustomer = "";
+          for (let r = 1; r < tbl.rows.length; r++) {
+            const cells = Array.from(tbl.rows[r].cells);
+            if (cells.length < 10) continue;
+
+            let idx = 0;
+            if (cells.length >= 12) {
+              currentCustomer = (cells[0].innerText || "").trim() || currentCustomer;
+              idx = 1;
+            }
+
+            const facName = (cells[idx]?.innerText || "").trim();
+            const orderCode = (cells[idx + 1]?.innerText || "").trim();
+            const trackingCell = cells[idx + 8];
+            const prevNoteCell = cells[idx + 9];
+            const noteCell = cells[idx + 10];
+
+            const matchedOrder = nextData.orders.find(o => o.customer.toLowerCase() === currentCustomer.toLowerCase());
+            const matchedDetail = matchedOrder
+              ? matchedOrder.factoryDetails.find(fd =>
+                  fd.factory.toLowerCase() === facName.toLowerCase() &&
+                  (!orderCode || fd.orderCode.toLowerCase() === orderCode.toLowerCase())
+                )
+              : null;
+
+            if (matchedDetail) {
+              if (trackingCell) {
+                const spans = Array.from(trackingCell.querySelectorAll("span"));
+                if (spans.length > 0) {
+                  matchedDetail.tracking = spans
+                    .map(sp => {
+                      const txt = (sp.innerText || "").trim();
+                      const styleAttr = (sp.getAttribute("style") || "").toLowerCase();
+                      const isHi = styleAttr.includes("font-weight: bold") || styleAttr.includes("d32f2f");
+                      return { text: txt, highlight: isHi };
+                    })
+                    .filter(item => item.text && item.text !== "-");
+                } else {
+                  const plainTr = (trackingCell.innerText || "").trim();
+                  matchedDetail.tracking = plainTr && plainTr !== "-"
+                    ? plainTr.split(/\n+/).map(t => ({ text: t.trim(), highlight: false })).filter(x => x.text)
+                    : [];
+                }
+              }
+
+              if (prevNoteCell) {
+                const rawPrev = (prevNoteCell.innerText || "").trim();
+                matchedDetail.prevNotes = rawPrev && rawPrev !== "-"
+                  ? rawPrev.replace(/^[A-Za-zÀ-ỹ.\s]+:\s*/i, "").trim()
+                  : "-";
+              }
+
+              if (noteCell) {
+                const rawNote = (noteCell.innerText || "").trim();
+                matchedDetail.notes = rawNote && rawNote !== "-" ? rawNote : "-";
+              }
+            }
+          }
+        });
+
+        return normalizeOrderFlags(nextData);
       }
 
-      const nextData = buildReportDataFromScriptPayload({ rawExcerpt: plainText });
-      const dateMatch = plainText.match(/(Thứ\s+[A-Za-zÀ-ỹ]+,\s*ngày\s*\d{1,2}\/\d{1,2}\/\d{4})/i);
+      // 3. Nếu dán văn bản thuần túy
+      const dateMatch = trimmed.match(/(Thứ\s+[A-Za-zÀ-ỹ]+,\s*ngày\s*\d{1,2}\/\d{1,2}\/\d{4})/i);
       if (dateMatch) {
         nextData.reportDate = dateMatch[1];
       }
 
-      const lines = plainText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-      const updateLines = lines.filter(l => /^\d{1,2}\/\d{1,2}\s*:/.test(l) || /cập nhật|bao bì|hàng thô|đóng cont/i.test(l));
-
-      if (updateLines.length > 0 && nextData.orders.length > 0) {
-        const firstDetail = nextData.orders[0].factoryDetails[0];
-        if (firstDetail) {
-          const newItems = updateLines.slice(0, 6).map(txt => ({
-            text: `[Gmail] ${txt}`,
-            highlight: true
-          }));
-          firstDetail.tracking = [...newItems, ...(firstDetail.tracking || [])];
-        }
-      }
-
-      return nextData;
+      return normalizeOrderFlags(nextData);
     }
 
     /**
@@ -1549,67 +1474,23 @@
     };
 
     /**
-     * MODAL SỬA LINK DỮ LIỆU NGUỒN
-     */
-    function openSourceLinksModal() {
-      const listContainer = document.getElementById("sourceLinksEditorList");
-      const links = appState.data.sourceLinks || [];
-
-      listContainer.innerHTML = links.map((lnk, idx) => `
-        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-          <div class="flex items-center justify-between gap-2">
-            <label for="srcLabel_${idx}" class="text-[11px] font-bold text-slate-700">Tên nút hiển thị #${idx + 1}</label>
-            <span class="text-[10px] text-slate-400">Mở tab mới</span>
-          </div>
-          <input
-            id="srcLabel_${idx}"
-            type="text"
-            value="${String(lnk.label || "").replace(/"/g, "&quot;")}"
-            class="src-label-input w-full text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-          <label for="srcUrl_${idx}" class="block text-[11px] font-bold text-slate-700 pt-0.5">Đường dẫn (https://...)</label>
-          <input
-            id="srcUrl_${idx}"
-            type="url"
-            value="${String(lnk.url || "").replace(/"/g, "&quot;")}"
-            placeholder="https://drive.google.com/drive/folders/..."
-            class="src-url-input w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-        </div>
-      `).join("");
-
-      const modal = document.getElementById("sourceLinksModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    }
-
-    function closeSourceLinksModal() {
-      const modal = document.getElementById("sourceLinksModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
-
-    /**
      * RENDER CÁC THÀNH PHẦN GIAO DIỆN
      */
     function renderSourceLinksBar() {
       const bar = document.getElementById("sourceLinksBar");
       const links = appState.data.sourceLinks || [];
-      const chips = links.map((lnk) => {
-        const safeUrl = lnk.url && /^https?:\/\//i.test(lnk.url.trim()) ? lnk.url.trim() : "#";
-        return `
-          <a
-            href="${safeUrl}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 font-semibold transition"
-            title="Mở link nguồn ${lnk.label}"
-          >
-            <span>🔗</span>
-            <span>${lnk.label}</span>
-          </a>
-        `;
-      }).join("");
+      const chips = links.map((lnk, idx) => `
+        <a
+          href="${lnk.url || "#"}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 font-semibold transition"
+          title="Mở link nguồn ${lnk.label}"
+        >
+          <span>🔗</span>
+          <span>${lnk.label}</span>
+        </a>
+      `).join("");
 
       bar.innerHTML = `
         <div class="flex flex-wrap items-center gap-1.5">
@@ -1625,7 +1506,9 @@
         </button>
       `;
 
-      document.getElementById("editSourceLinksBtn").addEventListener("click", openSourceLinksModal);
+      document.getElementById("editSourceLinksBtn").addEventListener("click", () => {
+        openJsonModalWithTabHint("Chỉnh sửa mảng 'sourceLinks' trong JSON để cập nhật đường dẫn Drive/Sheet thực tế.");
+      });
     }
 
     function syncCustomerFilterOptions() {
@@ -1719,22 +1602,19 @@
     /**
      * RENDER TAB 1: LỊCH 2 THÁNG & DỰ BÁO THỜI TIẾT
      */
-    function buildTwoMonthCalendarMarkup(isFullScreen = false) {
+    function renderCalendarAndWeather() {
+      const calContainer = document.getElementById("twoMonthCalendarContainer");
       const todayISO = appState.data.todayISO || "2026-11-27";
       const eventsMap = appState.data.calendarEvents || {};
 
       const months = [
-        { year: 2026, monthIndex: 10, title: "📅 THÁNG 11, 2026", daysInMonth: 30, firstDayDow: 0 },
-        { year: 2026, monthIndex: 11, title: "📅 THÁNG 12, 2026", daysInMonth: 31, firstDayDow: 2 }
+        { year: 2026, monthIndex: 10, title: "📅 THÁNG 11, 2026", daysInMonth: 30, firstDayDow: 0 }, // 01/11/2026 là Chủ Nhật
+        { year: 2026, monthIndex: 11, title: "📅 THÁNG 12, 2026", daysInMonth: 31, firstDayDow: 2 }  // 01/12/2026 là Thứ 3
       ];
 
       const dayHeaders = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-      const minCellHeight = isFullScreen ? "min-h-[96px] sm:min-h-[118px]" : "min-h-[68px] sm:min-h-[82px]";
-      const eventTextClass = isFullScreen
-        ? "mt-1 text-[10px] sm:text-[11px] font-bold text-white px-1.5 py-1 rounded leading-snug whitespace-normal break-words shadow-2xs"
-        : "mt-0.5 text-[8.5px] sm:text-[9.5px] font-bold text-white px-1 py-0.5 rounded leading-[1.15] whitespace-normal break-words shadow-2xs";
 
-      return months.map(m => {
+      calContainer.innerHTML = months.map(m => {
         let cellsHtml = "";
         const totalSlots = Math.ceil((m.firstDayDow + m.daysInMonth) / 7) * 7;
 
@@ -1744,7 +1624,7 @@
           const isWeekend = colDow === 0 || colDow === 6;
 
           if (dayNum < 1 || dayNum > m.daysInMonth) {
-            cellsHtml += `<div class="${minCellHeight} bg-slate-50/70 border border-slate-200/70 rounded-lg p-1"></div>`;
+            cellsHtml += `<div class="min-h-[68px] sm:min-h-[82px] bg-slate-50/70 border border-slate-200/70 rounded-lg p-1"></div>`;
             continue;
           }
 
@@ -1757,7 +1637,7 @@
           const dayEvents = (eventsMap[dateISO] || []).filter(ev => matchesFactoryFilter(ev.factory));
           const hasEvents = dayEvents.length > 0;
 
-          let boxClass = `${minCellHeight} border rounded-lg p-1 sm:p-1.5 flex flex-col justify-between transition `;
+          let boxClass = "min-h-[68px] sm:min-h-[82px] border rounded-lg p-1 sm:p-1.5 flex flex-col justify-between transition ";
           if (isToday) {
             boxClass += "bg-amber-50/90 border-2 border-red-600 shadow-xs";
           } else if (isWeekend) {
@@ -1782,7 +1662,7 @@
 
           const eventsHtml = dayEvents.map(ev => `
             <div
-              class="${eventTextClass}"
+              class="mt-1 text-[10px] sm:text-[11px] font-bold text-white px-1.5 py-0.5 rounded leading-tight truncate shadow-2xs"
               style="background-color: ${ev.color || "#1d4ed8"};"
               title="${ev.title}"
             >
@@ -1791,15 +1671,12 @@
           `).join("");
 
           cellsHtml += `
-            <div
-              data-cal-date="${dateISO}"
-              class="${boxClass} ${hasEvents ? "cursor-pointer hover:ring-2 hover:ring-blue-400" : ""}"
-            >
-              <div class="flex items-center justify-between gap-0.5">
-                ${isToday ? `<span class="text-[8px] font-extrabold uppercase bg-red-600 text-white px-1 py-0.5 rounded leading-none">Hôm nay</span>` : `<span></span>`}
+            <div class="${boxClass}">
+              <div class="flex items-center justify-between gap-1">
+                ${isToday ? `<span class="text-[9px] font-extrabold uppercase bg-red-600 text-white px-1.5 py-0.5 rounded">Hôm nay</span>` : `<span></span>`}
                 <span class="${numClass}">${dayNum}</span>
               </div>
-              <div class="mt-0.5 space-y-0.5">${eventsHtml}</div>
+              <div class="mt-0.5">${eventsHtml}</div>
             </div>
           `;
         }
@@ -1820,90 +1697,6 @@
           </div>
         `;
       }).join("");
-    }
-
-    function openFullCalendarModal() {
-      const fullContainer = document.getElementById("fullTwoMonthCalendarContainer");
-      if (fullContainer) {
-        fullContainer.innerHTML = buildTwoMonthCalendarMarkup(true);
-      }
-      const modal = document.getElementById("fullCalendarModal");
-      if (modal) {
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-      }
-    }
-
-    function closeFullCalendarModal() {
-      const modal = document.getElementById("fullCalendarModal");
-      if (modal) {
-        modal.classList.add("hidden");
-        modal.classList.remove("flex");
-      }
-    }
-
-    function renderCalendarAndWeather() {
-      const calContainer = document.getElementById("twoMonthCalendarContainer");
-      const eventsMap = appState.data.calendarEvents || {};
-
-      calContainer.innerHTML = buildTwoMonthCalendarMarkup(false);
-
-      const fullModal = document.getElementById("fullCalendarModal");
-      if (fullModal && !fullModal.classList.contains("hidden")) {
-        const fullContainer = document.getElementById("fullTwoMonthCalendarContainer");
-        if (fullContainer) {
-          fullContainer.innerHTML = buildTwoMonthCalendarMarkup(true);
-        }
-      }
-
-      const detailBox = document.getElementById("calendarDayDetailBox");
-      if (detailBox) {
-        detailBox.classList.add("hidden");
-        detailBox.innerHTML = "";
-      }
-
-      calContainer.querySelectorAll("[data-cal-date]").forEach(cell => {
-        cell.addEventListener("click", () => {
-          const dateISO = cell.dataset.calDate;
-          const matchedEvents = (eventsMap[dateISO] || []).filter(ev => matchesFactoryFilter(ev.factory));
-          if (matchedEvents.length === 0) {
-            openFullCalendarModal();
-            return;
-          }
-          if (!detailBox) return;
-
-          const parts = dateISO.split("-");
-          const formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateISO;
-
-          detailBox.innerHTML = `
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <div class="font-extrabold text-blue-950">📌 Chi tiết lịch đi xưởng ngày ${formattedDate}</div>
-              <div class="flex items-center gap-2">
-                <button type="button" id="expandFromDetailBtn" class="text-xs font-bold text-blue-800 hover:text-blue-950 bg-white px-2.5 py-0.5 rounded border border-blue-200 cursor-pointer">⛶ Phóng to toàn bộ lịch</button>
-                <button type="button" id="closeCalDetailBtn" class="text-xs font-bold text-slate-500 hover:text-slate-800 px-2 py-0.5 rounded cursor-pointer">✕ Đóng</button>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              ${matchedEvents.map(ev => `
-                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-2xs" style="background-color: ${ev.color || "#1d4ed8"};">
-                  ${ev.title}
-                </span>
-              `).join("")}
-            </div>
-          `;
-          detailBox.classList.remove("hidden");
-
-          const expandBtn = document.getElementById("expandFromDetailBtn");
-          if (expandBtn) {
-            expandBtn.addEventListener("click", openFullCalendarModal);
-          }
-
-          const closeBtn = document.getElementById("closeCalDetailBtn");
-          if (closeBtn) {
-            closeBtn.addEventListener("click", () => detailBox.classList.add("hidden"));
-          }
-        });
-      });
 
       // Render Thời tiết 5 ngày tới
       const weatherContainer = document.getElementById("weatherForecastContainer");
@@ -2077,7 +1870,7 @@
         </table>
       `;
 
-      // Hộp cảnh báo chậm tiến độ
+      // Hộp cảnh báo chậm tiến độ (khớp chính xác báo cáo từ xưởng)
       const delayedOrders = filteredOrders.filter(o => o.isDelayed && o.delayAlerts && o.delayAlerts.length > 0);
       if (delayedOrders.length === 0) {
         alertContainer.innerHTML = `
@@ -2091,15 +1884,22 @@
       const itemsHtml = delayedOrders.map(o => {
         const alertsLi = o.delayAlerts
           .filter(al => matchesFactoryFilter(al.factory))
-          .map(al => `
-            <li class="mb-2 last:mb-0 text-xs sm:text-sm text-slate-800">
-              <span class="font-bold text-slate-900">Xưởng ${al.factory}</span>
-              <span class="text-slate-600">(${al.orderCode})</span>:
-              Kế hoạch <span class="font-semibold">T- = ${al.tMinus}</span> (${al.deliveryText}), báo:
-              <span class="italic text-slate-700">"${al.detail}"</span>
-              <div class="mt-0.5 text-red-700 font-bold">➔ Nguy cơ trễ tiến độ / ${al.statusLabel}!</div>
-            </li>
-          `).join("");
+          .map(al => {
+            const metaParts = [];
+            if (al.orderCode) metaParts.push(`(${al.orderCode})`);
+            if (al.deliveryText) metaParts.push(`(${al.deliveryText})`);
+            if (al.tMinus) metaParts.push(`[T- = ${al.tMinus}]`);
+            return `
+              <li class="mb-2 last:mb-0 text-xs sm:text-sm text-slate-800">
+                <span class="font-bold text-slate-900">Xưởng ${al.factory}</span>
+                ${metaParts.length ? `<span class="text-slate-700">${metaParts.join(" ")}</span>` : ""}:
+                <span class="text-red-700 font-bold">${al.detail || "Chậm tiến độ"}</span>
+                ${al.statusLabel ? `<div class="mt-0.5 italic text-slate-800">➔ ${al.statusLabel}</div>` : ""}
+              </li>
+            `;
+          }).join("");
+
+        if (!alertsLi) return "";
 
         return `
           <div class="pb-3 mb-3 border-b border-dashed border-amber-300 last:border-none last:mb-0 last:pb-0">
@@ -2206,6 +2006,7 @@
 
             return `
               <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                <!-- Header từng xưởng + đầy đủ các chỉ số -->
                 <div class="px-3.5 py-2.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-xs font-extrabold text-white px-2.5 py-0.5 rounded-lg" style="background-color:${facColor};">
@@ -2227,6 +2028,7 @@
                   </div>
                 </div>
 
+                <!-- Nội dung Theo dõi đơn hàng, Lưu ý đơn trước & Ghi chú -->
                 <div class="p-3.5 grid grid-cols-1 lg:grid-cols-12 gap-4">
                   <div class="lg:col-span-6">
                     <div class="text-[11px] font-bold uppercase tracking-wider text-blue-900 mb-2 flex items-center gap-1.5">
@@ -2354,6 +2156,7 @@
       const overviewContainer = document.getElementById("weeklyOverviewCards");
       const dailyContainer = document.getElementById("dailyScheduleContainer");
 
+      // 1. Lịch tuần (Tuần này & Tuần tới)
       overviewContainer.innerHTML = (appState.data.weeklyOverview || []).map(wk => {
         const listHtml = (wk.highlights || []).map(item => `
           <div class="flex items-start gap-2.5 py-2 border-b border-slate-100 last:border-none">
@@ -2379,6 +2182,7 @@
         `;
       }).join("");
 
+      // 2. Lịch từng ngày (Thứ 2 - Thứ 6)
       const rows = (appState.data.dailySchedule || []).map(day => {
         const filteredTasks = (day.tasks || []).filter(t => matchesFactoryFilter(t.factory));
         const isToday = day.status === "today";
@@ -2476,83 +2280,7 @@
     /**
      * XỬ LÝ MODAL NHẬP / DÁN DỮ LIỆU TỪ GMAIL HOẶC JSON
      */
-    function ensureAppsScriptControlsInModal() {
-      const textarea = document.getElementById("jsonTextarea");
-      if (!textarea || document.getElementById("appsScriptUrlInput")) return;
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "p-3 rounded-xl bg-blue-50/70 border border-blue-200 space-y-2 mb-2";
-      wrapper.innerHTML = `
-        <div class="flex items-center justify-between gap-2">
-          <label for="appsScriptUrlInput" class="text-xs font-bold text-blue-950 flex items-center gap-1.5">
-            <span>⚡</span>
-            <span>Link tự động lấy dữ liệu từ Apps Script (/exec)</span>
-          </label>
-          <span class="text-[10px] font-semibold text-blue-700 bg-white px-2 py-0.5 rounded border border-blue-200">
-            Lưu tự động
-          </span>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-2">
-          <input
-            id="appsScriptUrlInput"
-            type="url"
-            placeholder="https://script.google.com/macros/s/.../exec"
-            class="flex-1 text-xs px-3 py-2 rounded-xl border border-blue-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-          <button
-            id="fetchAppsScriptBtn"
-            type="button"
-            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white shadow-2xs transition cursor-pointer shrink-0"
-          >
-            ↻ Tải từ Apps Script
-          </button>
-        </div>
-      `;
-
-      textarea.parentNode.insertBefore(wrapper, textarea);
-
-      const urlInput = document.getElementById("appsScriptUrlInput");
-      urlInput.value = loadAppsScriptUrl();
-      urlInput.addEventListener("change", (e) => saveAppsScriptUrl(e.target.value));
-
-      const fetchBtn = document.getElementById("fetchAppsScriptBtn");
-      fetchBtn.addEventListener("click", async () => {
-        const errBox = document.getElementById("jsonErrorMsg");
-        const targetUrl = urlInput.value.trim();
-        saveAppsScriptUrl(targetUrl);
-
-        fetchBtn.disabled = true;
-        fetchBtn.textContent = "Đang tải...";
-        try {
-          await fetchFromAppsScriptUrl(targetUrl, true);
-          const updatedTextarea = document.getElementById("jsonTextarea");
-          if (updatedTextarea) {
-            updatedTextarea.value = JSON.stringify(appState.data, null, 2);
-          }
-          if (errBox) {
-            errBox.className = "hidden text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2";
-            errBox.classList.add("hidden");
-          }
-          closeJsonModal();
-        } catch (err) {
-          if (errBox) {
-            errBox.textContent = "Lỗi tải từ Apps Script: " + err.message;
-            errBox.className = "text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2";
-            errBox.classList.remove("hidden");
-          }
-        } finally {
-          fetchBtn.disabled = false;
-          fetchBtn.textContent = "↻ Tải từ Apps Script";
-        }
-      });
-    }
-
     function openJsonModal(hintText = "") {
-      ensureAppsScriptControlsInModal();
-      const urlInput = document.getElementById("appsScriptUrlInput");
-      if (urlInput) {
-        urlInput.value = loadAppsScriptUrl();
-      }
       document.getElementById("jsonTextarea").value = JSON.stringify(appState.data, null, 2);
       const errBox = document.getElementById("jsonErrorMsg");
       if (hintText) {
@@ -2565,6 +2293,10 @@
       const modal = document.getElementById("jsonModal");
       modal.classList.remove("hidden");
       modal.classList.add("flex");
+    }
+
+    function openJsonModalWithTabHint(hintText) {
+      openJsonModal(hintText);
     }
 
     function closeJsonModal() {
@@ -2641,50 +2373,6 @@
         });
       }
 
-      const openFullCalendarBtnEl = document.getElementById("openFullCalendarBtn");
-      if (openFullCalendarBtnEl) {
-        openFullCalendarBtnEl.addEventListener("click", openFullCalendarModal);
-      }
-
-      const closeFullCalendarModalBtnEl = document.getElementById("closeFullCalendarModalBtn");
-      if (closeFullCalendarModalBtnEl) {
-        closeFullCalendarModalBtnEl.addEventListener("click", closeFullCalendarModal);
-      }
-
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          closeFullCalendarModal();
-        }
-      });
-
-      const closeSourceLinksModalBtnEl = document.getElementById("closeSourceLinksModalBtn");
-      if (closeSourceLinksModalBtnEl) {
-        closeSourceLinksModalBtnEl.addEventListener("click", closeSourceLinksModal);
-      }
-
-      const cancelSourceLinksModalBtnEl = document.getElementById("cancelSourceLinksModalBtn");
-      if (cancelSourceLinksModalBtnEl) {
-        cancelSourceLinksModalBtnEl.addEventListener("click", closeSourceLinksModal);
-      }
-
-      const saveSourceLinksBtnEl = document.getElementById("saveSourceLinksBtn");
-      if (saveSourceLinksBtnEl) {
-        saveSourceLinksBtnEl.addEventListener("click", () => {
-          const labels = Array.from(document.querySelectorAll(".src-label-input")).map(el => el.value.trim());
-          const urls = Array.from(document.querySelectorAll(".src-url-input")).map(el => el.value.trim());
-
-          appState.data.sourceLinks = labels.map((lbl, i) => ({
-            label: lbl || `Nguồn ${i + 1}`,
-            url: urls[i] || "#"
-          }));
-
-          saveDataToStorage(appState.data);
-          renderSourceLinksBar();
-          closeSourceLinksModal();
-          showToast("Đã cập nhật link dữ liệu nguồn!", "🔗");
-        });
-      }
-
       const openJsonModalBtnEl = document.getElementById("openJsonModalBtn");
       if (openJsonModalBtnEl) {
         openJsonModalBtnEl.addEventListener("click", () => openJsonModal(""));
@@ -2703,7 +2391,7 @@
       const resetSampleJsonBtnEl = document.getElementById("resetSampleJsonBtn");
       if (resetSampleJsonBtnEl) {
         resetSampleJsonBtnEl.addEventListener("click", () => {
-          const sampleCopy = JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA));
+          const sampleCopy = normalizeOrderFlags(JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)));
           appState.data = sampleCopy;
           saveDataToStorage(sampleCopy);
           const jsonTextareaEl = document.getElementById("jsonTextarea");
@@ -2750,13 +2438,6 @@
       setActiveTab("calendar-weather");
       setPlanMode("both");
       renderAll();
-
-      const savedScriptUrl = loadAppsScriptUrl();
-      if (savedScriptUrl) {
-        fetchFromAppsScriptUrl(savedScriptUrl, false).catch(() => {
-          // Giữ nguyên dữ liệu localStorage nếu mạng tạm thời gián đoạn
-        });
-      }
     });
   </script>
 </body>
