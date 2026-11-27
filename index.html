@@ -457,6 +457,28 @@
       </div>
 
       <div class="p-4 sm:p-5 space-y-3">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <label for="appsScriptUrlInput" class="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
+            🔗 Link Web App Google Apps Script (/exec)
+          </label>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input
+              id="appsScriptUrlInput"
+              type="text"
+              spellcheck="false"
+              placeholder="https://script.google.com/macros/s/.../exec"
+              class="flex-1 font-mono text-xs px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+            <button
+              id="fetchAppsScriptBtn"
+              type="button"
+              class="text-xs font-bold px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white shadow-2xs transition cursor-pointer shrink-0"
+            >
+              ⬇️ Tải từ Apps Script
+            </button>
+          </div>
+        </div>
+
         <p class="text-xs text-slate-600 leading-relaxed">
           Dán <strong>nội dung email / HTML email</strong> (ví dụ từ <em>"🚀 BÁO CÁO TỔNG HỢP TUẦN - 27/11"</em>) hoặc <strong>JSON</strong> vào ô bên dưới. Hệ thống tự động nhận diện cập nhật mới, lưu vào <code>localStorage</code> để dùng hàng ngày, hoặc bạn có thể bấm <strong>Khôi phục mẫu 27/11/2026</strong>.
         </p>
@@ -508,6 +530,29 @@
 
   <script>
     const STORAGE_KEY = "GLOVIMEX_QC_REPORT_DATA_V1";
+    const APPS_SCRIPT_URL_KEY = "https://script.google.com/macros/s/AKfycbzBUL5GU4vwCztG1wMnHXNTFqSbGgteUXIz66gwvacLvBB50j7gndTkUNzhqwcvPZADHA/exec";
+    const DEFAULT_APPS_SCRIPT_PLACEHOLDER = "https://script.google.com/macros/s/AKfycbzBUL5GU4vwCztG1wMnHXNTFqSbGgteUXIz66gwvacLvBB50j7gndTkUNzhqwcvPZADHA/exec";
+
+    function loadAppsScriptUrl() {
+      try {
+        return localStorage.getItem(APPS_SCRIPT_URL_KEY) || DEFAULT_APPS_SCRIPT_PLACEHOLDER;
+      } catch (e) {
+        return DEFAULT_APPS_SCRIPT_PLACEHOLDER;
+      }
+    }
+
+    function saveAppsScriptUrl(url) {
+      try {
+        const clean = (url || "").trim();
+        if (clean) {
+          localStorage.setItem(APPS_SCRIPT_URL_KEY, clean);
+        } else {
+          localStorage.removeItem(APPS_SCRIPT_URL_KEY);
+        }
+      } catch (e) {
+        // Bỏ qua nếu bộ nhớ đầy hoặc bị chặn
+      }
+    }
 
     /**
      * DỮ LIỆU MẪU CHUẨN NGÀY 27/11/2026 (KHỚP BÁO CÁO GLOVIMEX)
@@ -516,11 +561,12 @@
       reportDate: "Thứ Sáu, ngày 27/11/2026",
       todayISO: "2026-11-27",
       sourceLinks: [
-        { label: "AN - Share", url: "https://drive.google.com/drive/folders/AN-Share" },
-        { label: "VNH - Share", url: "https://drive.google.com/drive/folders/VNH-Share" },
-        { label: "LTU - Share", url: "https://drive.google.com/drive/folders/LTU-Share" },
-        { label: "CQ - Share", url: "https://drive.google.com/drive/folders/CQ-Share" },
-        { label: "Xưởng lẻ", url: "https://drive.google.com/drive/folders/Xuong-le" }
+       { label: "AN - Share", url: "https://docs.google.com/spreadsheets/d/1AwMQ-LMv0H0FJXj8t5lTaM_6LvgS8rn0AnuT2VQJvJU/edit?usp=drive_link" },
+        { label: "VNH - Share", url: "https://docs.google.com/spreadsheets/d/1XWX0tK5jlzQosCe0vb9ERcsxF3WIh8FwYIGW_N-Bdbk/edit?usp=drive_link" },
+        { label: "LTU - Share", url: "https://docs.google.com/spreadsheets/d/138XMiod5vhoAE9tyoIb7MbQKDBdFgacOxyWtOGXX0-Y/edit?usp=drive_link" },
+        { label: "CQ - Share", url: "https://docs.google.com/spreadsheets/d/1XxMKZg8b2lqkznPOYKo8H3V5jGoOUmsz4x7CrQXHI5s/edit?usp=drive_link" },
+        { label: "Xưởng lẻ", url: "https://docs.google.com/spreadsheets/d/1NR9nNf7oNxP6iFWpCiLBXRmBNIkKkZLx7BIz4YpFUZQ/edit?usp=drive_link" }
+
       ],
       factories: ["AN", "LTU", "VNH", "CQ", "A.CẢNH", "Hùng TT", "A Cảnh", "A Tước"],
       factoryColors: {
@@ -2281,6 +2327,10 @@
      * XỬ LÝ MODAL NHẬP / DÁN DỮ LIỆU TỪ GMAIL HOẶC JSON
      */
     function openJsonModal(hintText = "") {
+      const urlInput = document.getElementById("appsScriptUrlInput");
+      if (urlInput) {
+        urlInput.value = loadAppsScriptUrl();
+      }
       document.getElementById("jsonTextarea").value = JSON.stringify(appState.data, null, 2);
       const errBox = document.getElementById("jsonErrorMsg");
       if (hintText) {
@@ -2388,6 +2438,57 @@
         cancelJsonModalBtnEl.addEventListener("click", closeJsonModal);
       }
 
+      const fetchAppsScriptBtnEl = document.getElementById("fetchAppsScriptBtn");
+      if (fetchAppsScriptBtnEl) {
+        fetchAppsScriptBtnEl.addEventListener("click", async () => {
+          const urlInput = document.getElementById("appsScriptUrlInput");
+          const errBox = document.getElementById("jsonErrorMsg");
+          const execUrl = (urlInput ? urlInput.value : loadAppsScriptUrl()).trim();
+
+          if (!execUrl || execUrl === DEFAULT_APPS_SCRIPT_PLACEHOLDER) {
+            if (errBox) {
+              errBox.textContent = "Vui lòng nhập link Web App Google Apps Script (/exec) hợp lệ trước khi tải.";
+              errBox.className = "text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2";
+              errBox.classList.remove("hidden");
+            }
+            return;
+          }
+
+          saveAppsScriptUrl(execUrl);
+          fetchAppsScriptBtnEl.disabled = true;
+          const oldLabel = fetchAppsScriptBtnEl.textContent;
+          fetchAppsScriptBtnEl.textContent = "⏳ Đang tải...";
+
+          try {
+            const resp = await fetch(execUrl, { method: "GET" });
+            if (!resp.ok) {
+              throw new Error(`HTTP ${resp.status}`);
+            }
+            const rawText = await resp.text();
+            const parsed = parseGmailOrJsonInput(rawText);
+            appState.data = parsed;
+            saveDataToStorage(parsed);
+            appState.expandedOrderIds = new Set(appState.data.orders.slice(0, 3).map(o => o.id));
+            if (errBox) {
+              errBox.className = "hidden text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2";
+              errBox.classList.add("hidden");
+            }
+            closeJsonModal();
+            renderAll();
+            showToast("Đã tải và cập nhật dữ liệu từ Apps Script!", "✅");
+          } catch (err) {
+            if (errBox) {
+              errBox.textContent = "Lỗi tải từ Apps Script: " + err.message;
+              errBox.className = "text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2";
+              errBox.classList.remove("hidden");
+            }
+          } finally {
+            fetchAppsScriptBtnEl.disabled = false;
+            fetchAppsScriptBtnEl.textContent = oldLabel;
+          }
+        });
+      }
+
       const resetSampleJsonBtnEl = document.getElementById("resetSampleJsonBtn");
       if (resetSampleJsonBtnEl) {
         resetSampleJsonBtnEl.addEventListener("click", () => {
@@ -2410,6 +2511,10 @@
       const applyJsonBtnEl = document.getElementById("applyJsonBtn");
       if (applyJsonBtnEl) {
         applyJsonBtnEl.addEventListener("click", () => {
+          const urlInput = document.getElementById("appsScriptUrlInput");
+          if (urlInput) {
+            saveAppsScriptUrl(urlInput.value);
+          }
           const jsonTextareaEl = document.getElementById("jsonTextarea");
           const raw = jsonTextareaEl ? jsonTextareaEl.value : "";
           const errBox = document.getElementById("jsonErrorMsg");
