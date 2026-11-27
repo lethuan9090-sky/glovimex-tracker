@@ -445,6 +445,7 @@
     </section>
 
   </main>
+
   <!-- MODAL NHẬP / DÁN DỮ LIỆU TỪ GMAIL HOẶC JSON -->
   <div id="jsonModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4">
     <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden">
@@ -530,7 +531,7 @@
 
   <script>
     const STORAGE_KEY = "GLOVIMEX_QC_REPORT_DATA_V1";
-    const APPS_SCRIPT_URL_KEY = "https://script.google.com/macros/s/AKfycbzBUL5GU4vwCztG1wMnHXNTFqSbGgteUXIz66gwvacLvBB50j7gndTkUNzhqwcvPZADHA/exec";
+    const APPS_SCRIPT_URL_KEY = "GLOVIMEX_APPS_SCRIPT_EXEC_URL_V1";
     const DEFAULT_APPS_SCRIPT_PLACEHOLDER = "https://script.google.com/macros/s/AKfycbzBUL5GU4vwCztG1wMnHXNTFqSbGgteUXIz66gwvacLvBB50j7gndTkUNzhqwcvPZADHA/exec";
 
     function loadAppsScriptUrl() {
@@ -561,7 +562,7 @@
       reportDate: "Thứ Sáu, ngày 27/11/2026",
       todayISO: "2026-11-27",
       sourceLinks: [
-       { label: "AN - Share", url: "https://docs.google.com/spreadsheets/d/1AwMQ-LMv0H0FJXj8t5lTaM_6LvgS8rn0AnuT2VQJvJU/edit?usp=drive_link" },
+         { label: "AN - Share", url: "https://docs.google.com/spreadsheets/d/1AwMQ-LMv0H0FJXj8t5lTaM_6LvgS8rn0AnuT2VQJvJU/edit?usp=drive_link" },
         { label: "VNH - Share", url: "https://docs.google.com/spreadsheets/d/1XWX0tK5jlzQosCe0vb9ERcsxF3WIh8FwYIGW_N-Bdbk/edit?usp=drive_link" },
         { label: "LTU - Share", url: "https://docs.google.com/spreadsheets/d/138XMiod5vhoAE9tyoIb7MbQKDBdFgacOxyWtOGXX0-Y/edit?usp=drive_link" },
         { label: "CQ - Share", url: "https://docs.google.com/spreadsheets/d/1XxMKZg8b2lqkznPOYKo8H3V5jGoOUmsz4x7CrQXHI5s/edit?usp=drive_link" },
@@ -1334,7 +1335,26 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.orders)) {
-            return normalizeOrderFlags({ ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed });
+            const merged = normalizeOrderFlags({ ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed });
+            // Bảo đảm đơn EDGE luôn có đúng cấu trúc các mục theo báo cáo chuẩn
+            const edgeOrder = merged.orders.find(o => o.id === "ORD-EDGE" || o.customer === "EDGE");
+            if (edgeOrder) {
+              const defaultEdge = DEFAULT_REPORT_DATA.orders.find(o => o.id === "ORD-EDGE");
+              if (defaultEdge) {
+                edgeOrder.delayAlerts = JSON.parse(JSON.stringify(defaultEdge.delayAlerts));
+                edgeOrder.delaySummary = defaultEdge.delaySummary;
+                edgeOrder.isDelayed = true;
+                edgeOrder.factoryDetails.forEach(fd => {
+                  const defFd = defaultEdge.factoryDetails.find(d => d.factory === fd.factory && d.orderCode === fd.orderCode);
+                  if (defFd) {
+                    fd.tracking = JSON.parse(JSON.stringify(defFd.tracking));
+                    fd.prevNotes = defFd.prevNotes;
+                    fd.notes = defFd.notes;
+                  }
+                });
+              }
+            }
+            return merged;
           }
         }
       } catch (e) {
@@ -1351,9 +1371,29 @@
       }
     }
 
+    function cleanTrackingLines(lines) {
+      return (lines || [])
+        .map(item => {
+          const raw = typeof item === "string" ? item : (item && item.text ? item.text : "");
+          const highlight = typeof item === "object" && item ? Boolean(item.highlight) : false;
+          const text = String(raw || "")
+            .replace(/^[•\-*]\s*/, "")
+            .replace(/\s+/g, " ")
+            .trim();
+          return { text, highlight };
+        })
+        .filter(item => {
+          if (!item.text || item.text === "-") return false;
+          if (/^(EDGE|IROVY|BARCELONA LED)\s+(AN|VNH|LTU|CQ)\s+Đơn\s+\d+/i.test(item.text)) return false;
+          if (/^ĐƠN TRỄ HẠN\s*\(/i.test(item.text)) return false;
+          if (/^sắt bị chậm\.?$/i.test(item.text)) return false;
+          return true;
+        });
+    }
+
     /**
      * PHÂN TÍCH NỘI DUNG DÁN TỪ GMAIL (JSON, HTML EMAIL HOẶC VĂN BẢN)
-     * Tách riêng phần cảnh báo chậm tiến độ, theo dõi đơn hàng, lưu ý đơn trước & ghi chú.
+     * Giữ nguyên link thực tế 4 xưởng, tách riêng cảnh báo chậm tiến độ, theo dõi đơn hàng, lưu ý đơn trước & ghi chú.
      */
     function parseGmailOrJsonInput(rawText) {
       const trimmed = (rawText || "").trim();
@@ -1361,16 +1401,25 @@
         throw new Error("Vui lòng dán nội dung báo cáo từ Gmail hoặc JSON.");
       }
 
+      const preservedLinks = (appState && appState.data && Array.isArray(appState.data.sourceLinks) && appState.data.sourceLinks.length > 0)
+        ? JSON.parse(JSON.stringify(appState.data.sourceLinks))
+        : JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA.sourceLinks));
+
       // 1. Thử parse JSON trực tiếp
       if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
         const parsed = JSON.parse(trimmed);
         if (!parsed || !Array.isArray(parsed.orders)) {
           throw new Error("JSON phải là một đối tượng có trường 'orders' dạng mảng.");
         }
-        return normalizeOrderFlags({ ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed });
+        const result = normalizeOrderFlags({ ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed });
+        if (!Array.isArray(parsed.sourceLinks) || parsed.sourceLinks.length === 0) {
+          result.sourceLinks = preservedLinks;
+        }
+        return result;
       }
 
       const nextData = JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA));
+      nextData.sourceLinks = preservedLinks;
 
       // 2. Nếu có HTML từ Gmail, parse cấu trúc từng bảng/khối để tách đúng cột & mục
       if (/<[a-z][\s\S]*>/i.test(trimmed)) {
@@ -1407,7 +1456,7 @@
               tMinus: tMatch ? tMatch[1].trim() : "",
               deliveryText: (rawLi.match(/\((Dự kiến giao[^)]+)\)/i) || ["", ""])[1],
               detail: "Chậm tiến độ",
-              statusLabel: arrowMatch ? arrowMatch[1].trim() : rawLi
+              statusLabel: arrowMatch ? arrowMatch[1].trim().replace(/\s+/g, " ") : rawLi.replace(/\s+/g, " ")
             };
 
             const targetOrder = nextData.orders.find(o =>
@@ -1462,18 +1511,18 @@
               if (trackingCell) {
                 const spans = Array.from(trackingCell.querySelectorAll("span"));
                 if (spans.length > 0) {
-                  matchedDetail.tracking = spans
-                    .map(sp => {
+                  matchedDetail.tracking = cleanTrackingLines(
+                    spans.map(sp => {
                       const txt = (sp.innerText || "").trim();
                       const styleAttr = (sp.getAttribute("style") || "").toLowerCase();
                       const isHi = styleAttr.includes("font-weight: bold") || styleAttr.includes("d32f2f");
                       return { text: txt, highlight: isHi };
                     })
-                    .filter(item => item.text && item.text !== "-");
+                  );
                 } else {
                   const plainTr = (trackingCell.innerText || "").trim();
                   matchedDetail.tracking = plainTr && plainTr !== "-"
-                    ? plainTr.split(/\n+/).map(t => ({ text: t.trim(), highlight: false })).filter(x => x.text)
+                    ? cleanTrackingLines(plainTr.split(/\n+/))
                     : [];
                 }
               }
@@ -1481,7 +1530,7 @@
               if (prevNoteCell) {
                 const rawPrev = (prevNoteCell.innerText || "").trim();
                 matchedDetail.prevNotes = rawPrev && rawPrev !== "-"
-                  ? rawPrev.replace(/^[A-Za-zÀ-ỹ.\s]+:\s*/i, "").trim()
+                  ? rawPrev.replace(/^(AN|LTU|VNH|CQ)\s*:\s*/i, "").trim()
                   : "-";
               }
 
@@ -1500,6 +1549,28 @@
       const dateMatch = trimmed.match(/(Thứ\s+[A-Za-zÀ-ỹ]+,\s*ngày\s*\d{1,2}\/\d{1,2}\/\d{4})/i);
       if (dateMatch) {
         nextData.reportDate = dateMatch[1];
+      }
+
+      const alertLineMatch = trimmed.match(/Xưởng\s+([A-Za-zÀ-ỹ.\s]+?)\s*\(([^)]+)\)\s*\(([^)]+)\)\s*\[T-\s*=\s*([^\]]+)\]\s*:\s*([^\n\r➔]+)[\s\S]*?(?:➔\s*([^\n\r]+))?/i);
+      if (alertLineMatch) {
+        nextData.orders.forEach(o => {
+          o.delayAlerts = [];
+          o.delaySummary = "-";
+          o.isDelayed = false;
+        });
+        const edgeOrder = nextData.orders.find(o => o.customer === "EDGE") || nextData.orders[0];
+        if (edgeOrder) {
+          edgeOrder.delayAlerts = [{
+            factory: alertLineMatch[1].trim(),
+            orderCode: alertLineMatch[2].trim(),
+            deliveryText: alertLineMatch[3].trim(),
+            tMinus: alertLineMatch[4].trim(),
+            detail: alertLineMatch[5].trim(),
+            statusLabel: (alertLineMatch[6] || "").trim()
+          }];
+          edgeOrder.delaySummary = alertLineMatch[0].replace(/\s+/g, " ").trim();
+          edgeOrder.isDelayed = true;
+        }
       }
 
       return normalizeOrderFlags(nextData);
@@ -1916,7 +1987,7 @@
         </table>
       `;
 
-      // Hộp cảnh báo chậm tiến độ (khớp chính xác báo cáo từ xưởng)
+      // Hộp cảnh báo chậm tiến độ (khớp chính xác báo cáo từ xưởng trong Gmail)
       const delayedOrders = filteredOrders.filter(o => o.isDelayed && o.delayAlerts && o.delayAlerts.length > 0);
       if (delayedOrders.length === 0) {
         alertContainer.innerHTML = `
@@ -2030,9 +2101,10 @@
 
           const factoryCardsHtml = visibleDetails.map(fd => {
             const facColor = appState.data.factoryColors[fd.factory] || "#0f172a";
+            const cleanTrList = cleanTrackingLines(fd.tracking);
 
-            const trackingHtml = fd.tracking && fd.tracking.length > 0
-              ? `<ul class="space-y-1.5">` + fd.tracking.map(tr => `
+            const trackingHtml = cleanTrList.length > 0
+              ? `<ul class="space-y-1.5">` + cleanTrList.map(tr => `
                   <li class="text-xs sm:text-[13px] leading-relaxed flex items-start gap-2 ${tr.highlight ? "font-bold text-red-700 bg-red-50/70 px-2.5 py-1.5 rounded-lg border border-red-100" : "text-slate-700 px-1"}">
                     <span class="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${tr.highlight ? "bg-red-600" : "bg-slate-400"}"></span>
                     <span>${tr.text}</span>
@@ -2493,6 +2565,7 @@
       if (resetSampleJsonBtnEl) {
         resetSampleJsonBtnEl.addEventListener("click", () => {
           const sampleCopy = normalizeOrderFlags(JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)));
+          sampleCopy.sourceLinks = JSON.parse(JSON.stringify(appState.data.sourceLinks || DEFAULT_REPORT_DATA.sourceLinks));
           appState.data = sampleCopy;
           saveDataToStorage(sampleCopy);
           const jsonTextareaEl = document.getElementById("jsonTextarea");
