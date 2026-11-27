@@ -1,0 +1,2309 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glovimex QC & Order Tracker — Theo dõi Đơn hàng & Xưởng</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Sọc chéo ngày cuối tuần / nghỉ */
+    .weekend-hatch {
+      background: repeating-linear-gradient(
+        45deg,
+        #f8fafc,
+        #f8fafc 6px,
+        #f1f5f9 6px,
+        #f1f5f9 12px
+      );
+    }
+
+    /* Tùy chỉnh thanh cuộn ngang cho bảng lớn */
+    .table-scroll::-webkit-scrollbar {
+      height: 7px;
+      width: 7px;
+    }
+    .table-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Hiệu ứng mượt cho accordion / modal */
+    .accordion-panel {
+      transition: all 0.22s ease;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .tab-view {
+        display: block !important;
+      }
+      body {
+        background: #ffffff !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP HEADER & NAVIGATION -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6">
+      <!-- Hàng trên: Thương hiệu + Ngày báo cáo + Nút dữ liệu -->
+      <div class="flex flex-wrap items-center justify-between gap-2 py-2.5 sm:py-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-900 via-blue-800 to-teal-700 flex items-center justify-center text-white font-extrabold text-base sm:text-lg shadow-sm shrink-0">
+            G
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="text-sm sm:text-lg font-extrabold text-slate-900 tracking-tight truncate">
+                BÁO CÁO TIẾN ĐỘ & KẾ HOẠCH TỔNG HỢP
+              </h1>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+                QC / Xuất khẩu
+              </span>
+            </div>
+            <p id="reportDateLabel" class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">
+              Thứ Sáu, ngày 27/11/2026 • Nguồn: 🚀 BÁO CÁO TỔNG HỢP TUẦN - 27/11
+            </p>
+          </div>
+        </div>
+
+        <!-- Hành động nhanh: Lọc xưởng, Dán từ Gmail & In báo cáo -->
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <select
+            id="factoryFilter"
+            aria-label="Lọc theo xưởng"
+            class="text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xl px-2.5 sm:px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition cursor-pointer"
+          >
+            <option value="ALL">🏭 Tất cả xưởng</option>
+            <option value="AN">AN (Mỹ Đức, HN)</option>
+            <option value="LTU">LTU (Chương Mỹ, HN)</option>
+            <option value="VNH">VNH (Kim Sơn, NB)</option>
+            <option value="CQ">CQ (Kim Sơn, NB)</option>
+            <option value="Xưởng lẻ">Xưởng lẻ / Khác</option>
+          </select>
+
+          <button
+            id="openJsonModalBtn"
+            type="button"
+            class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold bg-blue-900 hover:bg-blue-800 active:scale-[0.99] text-white px-3 py-2 rounded-xl shadow-sm transition cursor-pointer"
+            title="Dán nội dung báo cáo từ Gmail hoặc JSON để cập nhật"
+          >
+            <span>✉️</span>
+            <span class="hidden sm:inline">Dán dữ liệu từ Gmail</span>
+            <span class="sm:hidden">Gmail / JSON</span>
+          </button>
+
+          <button
+            id="printReportBtn"
+            type="button"
+            class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-3 py-2 rounded-xl shadow-2xs transition cursor-pointer"
+            title="In hoặc lưu báo cáo dưới dạng PDF"
+          >
+            <span>🖨️</span>
+            <span class="hidden md:inline">In / Xuất báo cáo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Thanh Link dữ liệu nguồn -->
+      <div id="sourceLinksBar" class="flex flex-wrap items-center justify-between gap-2 py-2 px-3 mb-2 rounded-xl bg-slate-50 border border-slate-200/90 text-xs">
+        <!-- Render bằng JS -->
+      </div>
+
+      <!-- 4 NÚT ĐIỀU HƯỚNG CHÍNH (TABS) -->
+      <nav aria-label="Điều hướng tính năng chính" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 pb-2.5">
+        <button
+          type="button"
+          data-tab="calendar-weather"
+          class="nav-tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border text-left sm:text-center"
+        >
+          <span class="text-base">📆</span>
+          <span>Lịch đi xưởng & Thời tiết</span>
+        </button>
+
+        <button
+          type="button"
+          data-tab="progress"
+          class="nav-tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border text-left sm:text-center"
+        >
+          <span class="text-base">📊</span>
+          <span>Tiến độ đơn hàng</span>
+        </button>
+
+        <button
+          type="button"
+          data-tab="tracking"
+          class="nav-tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border text-left sm:text-center"
+        >
+          <span class="text-base">📋</span>
+          <span>Theo dõi đơn hàng</span>
+        </button>
+
+        <button
+          type="button"
+          data-tab="weekly-plan"
+          class="nav-tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border text-left sm:text-center"
+        >
+          <span class="text-base">📅</span>
+          <span>Kế hoạch trong tuần</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- THÔNG BÁO TOAST NHẸ (THAY THẾ ALERT) -->
+  <div id="toastBanner" class="fixed bottom-4 right-4 z-50 hidden max-w-sm bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2.5">
+    <span id="toastIcon">✅</span>
+    <span id="toastText">Đã cập nhật dữ liệu</span>
+  </div>
+
+  <!-- NỘI DUNG CHÍNH -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-5">
+
+    <!-- Thanh tóm tắt chỉ số nhanh (KPI strip) -->
+    <section id="kpiStrip" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+      <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 shadow-xs">
+        <div class="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng đơn hàng</div>
+        <div id="kpiOrdersCount" class="mt-1 text-xl sm:text-2xl font-extrabold text-slate-900">9</div>
+        <div id="kpiOrdersSub" class="text-[11px] text-slate-500 mt-0.5">Đang theo dõi trên các xưởng</div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-amber-200/90 shadow-xs">
+        <div class="text-[11px] sm:text-xs font-semibold text-amber-700 uppercase tracking-wider">Cảnh báo chậm</div>
+        <div id="kpiDelayedCount" class="mt-1 text-xl sm:text-2xl font-extrabold text-red-600">1</div>
+        <div id="kpiDelayedSub" class="text-[11px] text-amber-800 mt-0.5">Cần xử lý / giục xưởng</div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-blue-200/90 shadow-xs">
+        <div class="text-[11px] sm:text-xs font-semibold text-blue-800 uppercase tracking-wider">Lịch đi xưởng (2 tháng)</div>
+        <div id="kpiVisitsCount" class="mt-1 text-xl sm:text-2xl font-extrabold text-blue-900">15</div>
+        <div id="kpiVisitsSub" class="text-[11px] text-blue-700 mt-0.5">Inline, Final & Đóng cont</div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-teal-200/90 shadow-xs">
+        <div class="text-[11px] sm:text-xs font-semibold text-teal-800 uppercase tracking-wider">Việc cần làm hôm nay</div>
+        <div id="kpiTodayTasksCount" class="mt-1 text-xl sm:text-2xl font-extrabold text-teal-700">3</div>
+        <div id="kpiTodayTasksSub" class="text-[11px] text-teal-800 mt-0.5">Thứ Sáu, 27/11/2026</div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 1: LỊCH ĐI XƯỞNG & THỜI TIẾT                                    -->
+    <!-- ===================================================================== -->
+    <section id="view-calendar-weather" class="tab-view space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-blue-950 flex items-center gap-2">
+              <span>📆</span>
+              <span>LỊCH ĐI XƯỞNG THÁNG 11 & THÁNG 12 / 2026</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Đánh dấu ngày hiện tại, ngày đã qua, cuối tuần/nghỉ và các mốc Inline, Final, Đóng cont.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
+              <span class="w-2 h-2 rounded-full bg-red-600"></span> Hôm nay (27/11)
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200">
+              <span class="w-2 h-2 rounded-full bg-sky-600"></span> Inline
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-200">
+              <span class="w-2 h-2 rounded-full bg-rose-600"></span> Final
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-50 text-purple-800 border border-purple-200">
+              <span class="w-2 h-2 rounded-full bg-purple-700"></span> Đóng cont
+            </span>
+          </div>
+        </div>
+
+        <div id="twoMonthCalendarContainer" class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5">
+          <!-- Render bằng JS -->
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-teal-800 flex items-center gap-2">
+              <span>🌤️</span>
+              <span>DỰ BÁO THỜI TIẾT 5 NGÀY TỚI (THEO VỊ TRÍ XƯỞNG)</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Cảnh báo độ ẩm cao (&gt;80%) và khung giờ mưa có thể ảnh hưởng phơi/vận chuyển hàng thô & bao bì.
+            </p>
+          </div>
+        </div>
+
+        <div id="weatherForecastContainer" class="space-y-4">
+          <!-- Render bằng JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: TIẾN ĐỘ ĐƠN HÀNG                                              -->
+    <!-- ===================================================================== -->
+    <section id="view-progress" class="tab-view hidden space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-blue-950 flex items-center gap-2">
+              <span>📊</span>
+              <span>BẢNG TỔNG HỢP TIẾN ĐỘ SẢN XUẤT</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Ma trận tiến độ theo từng đơn hàng/khách hàng across các xưởng, hiển thị T-, ngày giao dự kiến, ngày còn lại, ngày đi cont và xưởng sản xuất.
+            </p>
+          </div>
+          <div class="text-xs text-slate-500 font-medium">
+            Màu sắc thể hiện tỷ lệ hoàn thành & xưởng phụ trách
+          </div>
+        </div>
+
+        <!-- Bảng Ma trận tiến độ -->
+        <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200">
+          <div id="progressMatrixContainer">
+            <!-- Render bằng JS -->
+          </div>
+        </div>
+
+        <!-- Hộp cảnh báo chậm tiến độ -->
+        <div id="delayAlertContainer" class="mt-5">
+          <!-- Render bằng JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: THEO DÕI ĐƠN HÀNG (PHẦN II: TRỄ HẠN & TRONG TẦM KIỂM SOÁT)   -->
+    <!-- ===================================================================== -->
+    <section id="view-tracking" class="tab-view hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 sm:p-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-emerald-800 flex items-center gap-2">
+              <span>📋</span>
+              <span>THEO DÕI ĐƠN HÀNG THEO TỪNG XƯỞNG</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Bấm vào từng đơn hàng để mở/thu gọn chi tiết từng xưởng: hiển thị <strong>Theo dõi đơn hàng</strong>, <strong>Lưu ý đơn trước</strong> & <strong>Ghi chú</strong>.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <select
+              id="customerFilter"
+              aria-label="Lọc theo khách hàng"
+              class="text-xs sm:text-sm font-semibold bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600 transition cursor-pointer"
+            >
+              <option value="ALL">Tất cả khách hàng</option>
+            </select>
+
+            <div class="relative flex-1 sm:w-64">
+              <input
+                id="orderSearchInput"
+                type="text"
+                placeholder="Tìm đơn hàng, mã đơn, xưởng..."
+                class="w-full text-xs sm:text-sm pl-8 pr-3 py-2 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+              />
+              <span class="absolute left-2.5 top-2.5 text-slate-400 text-xs">🔎</span>
+            </div>
+            <button
+              id="toggleAllOrdersBtn"
+              type="button"
+              class="text-xs font-semibold px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition cursor-pointer shrink-0"
+            >
+              Mở tất cả
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <button
+            type="button"
+            data-status-filter="ALL"
+            class="status-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer bg-emerald-800 text-white border-emerald-800 shadow-2xs"
+          >
+            Tất cả trạng thái
+          </button>
+          <button
+            type="button"
+            data-status-filter="DELAYED"
+            class="status-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+          >
+            🚨 Trễ hạn
+          </button>
+          <button
+            type="button"
+            data-status-filter="ONTIME"
+            class="status-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+          >
+            🛡️ Trong tầm kiểm soát
+          </button>
+        </div>
+
+        <div id="orderTrackingListContainer" class="space-y-3">
+          <!-- Render bằng JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 4: KẾ HOẠCH TRONG TUẦN (LỊCH TUẦN & LỊCH TỪNG NGÀY)            -->
+    <!-- ===================================================================== -->
+    <section id="view-weekly-plan" class="tab-view hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-blue-800 flex items-center gap-2">
+              <span>📅</span>
+              <span>KẾ HOẠCH CÔNG TÁC TRONG TUẦN</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Chuyển đổi linh hoạt giữa <strong>Lịch tuần</strong> (tổng quan Tuần này & Tuần tới) và <strong>Lịch từng ngày</strong> (Thứ 2 – Thứ 6 chi tiết công việc, khách, xưởng, mã đơn).
+            </p>
+          </div>
+
+          <!-- Bộ chuyển chế độ xem Lịch tuần / Lịch từng ngày -->
+          <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 self-start sm:self-auto">
+            <button
+              id="modeBothBtn"
+              type="button"
+              data-plan-mode="both"
+              class="plan-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
+            >
+              Tất cả
+            </button>
+            <button
+              id="modeWeekBtn"
+              type="button"
+              data-plan-mode="week"
+              class="plan-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
+            >
+              📆 Lịch tuần
+            </button>
+            <button
+              id="modeDayBtn"
+              type="button"
+              data-plan-mode="day"
+              class="plan-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
+            >
+              🗓️ Lịch từng ngày
+            </button>
+          </div>
+        </div>
+
+        <!-- Khối Lịch tuần (Tuần này & Tuần tới) -->
+        <div id="weeklyOverviewBlock" class="mb-6">
+          <h3 class="text-sm sm:text-base font-bold text-slate-800 mb-2.5 flex items-center gap-2">
+            <span class="w-2 h-5 rounded-full bg-blue-700 inline-block"></span>
+            <span>Lịch tuần (Tuần hiện tại & Tuần kế tiếp)</span>
+          </h3>
+          <div id="weeklyOverviewCards" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <!-- Render bằng JS -->
+          </div>
+        </div>
+
+        <!-- Khối Lịch từng ngày (Thứ 2 - Thứ 6) -->
+        <div id="dailyScheduleBlock">
+          <h3 class="text-sm sm:text-base font-bold text-slate-800 mb-2.5 flex items-center gap-2">
+            <span class="w-2 h-5 rounded-full bg-amber-500 inline-block"></span>
+            <span>Lịch từng ngày (Thứ 2 – Thứ 6)</span>
+          </h3>
+
+          <!-- Bảng trên màn hình lớn + Thẻ trên mobile -->
+          <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200">
+            <div id="dailyScheduleContainer">
+              <!-- Render bằng JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <!-- MODAL NHẬP / DÁN DỮ LIỆU TỪ GMAIL HOẶC JSON -->
+  <div id="jsonModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-4 sm:px-5 py-3.5 bg-slate-900 text-white">
+        <div class="flex items-center gap-2">
+          <span>✉️</span>
+          <h3 class="text-sm sm:text-base font-bold">Cập nhật / Dán dữ liệu từ Gmail hoặc JSON</h3>
+        </div>
+        <button id="closeJsonModalBtn" type="button" class="text-slate-300 hover:text-white text-lg font-bold px-2 cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-4 sm:p-5 space-y-3">
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Dán <strong>nội dung email / HTML email</strong> (ví dụ từ <em>"🚀 BÁO CÁO TỔNG HỢP TUẦN - 27/11"</em>) hoặc <strong>JSON</strong> vào ô bên dưới. Hệ thống tự động nhận diện cập nhật mới, lưu vào <code>localStorage</code> để dùng hàng ngày, hoặc bạn có thể bấm <strong>Khôi phục mẫu 27/11/2026</strong>.
+        </p>
+
+        <textarea
+          id="jsonTextarea"
+          rows="12"
+          spellcheck="false"
+          placeholder="Dán nội dung báo cáo từ Gmail hoặc JSON vào đây..."
+          class="w-full font-mono text-xs p-3 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+        ></textarea>
+
+        <div id="jsonErrorMsg" class="hidden text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+          <button
+            id="resetSampleJsonBtn"
+            type="button"
+            class="text-xs font-semibold px-3 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 cursor-pointer"
+          >
+            ↺ Khôi phục mẫu 27/11/2026
+          </button>
+
+          <div class="flex items-center gap-2">
+            <button
+              id="cancelJsonModalBtn"
+              type="button"
+              class="text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 cursor-pointer"
+            >
+              Hủy
+            </button>
+            <button
+              id="applyJsonBtn"
+              type="button"
+              class="text-xs font-bold px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white shadow-sm cursor-pointer"
+            >
+              ✓ Phân tích & Áp dụng
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-3 px-4 text-center text-[11px] sm:text-xs text-slate-500 mt-auto no-print">
+    Glovimex Order & Factory Tracking App • Hỗ trợ xem trên Điện thoại, Máy tính bảng & Máy tính • Dữ liệu tham chiếu 27/11/2026
+  </footer>
+
+  <script>
+    const STORAGE_KEY = "GLOVIMEX_QC_REPORT_DATA_V1";
+
+    /**
+     * DỮ LIỆU MẪU CHUẨN NGÀY 27/11/2026 (KHỚP BÁO CÁO GLOVIMEX)
+     */
+    const DEFAULT_REPORT_DATA = {
+      reportDate: "Thứ Sáu, ngày 27/11/2026",
+      todayISO: "2026-11-27",
+      sourceLinks: [
+        { label: "AN - Share", url: "https://drive.google.com/drive/folders/AN-Share" },
+        { label: "VNH - Share", url: "https://drive.google.com/drive/folders/VNH-Share" },
+        { label: "LTU - Share", url: "https://drive.google.com/drive/folders/LTU-Share" },
+        { label: "CQ - Share", url: "https://drive.google.com/drive/folders/CQ-Share" },
+        { label: "Xưởng lẻ", url: "https://drive.google.com/drive/folders/Xuong-le" }
+      ],
+      factories: ["AN", "LTU", "VNH", "CQ", "A.CẢNH", "Hùng TT", "A Cảnh", "A Tước"],
+      factoryColors: {
+        "AN": "#1d4ed8",
+        "LTU": "#0284c7",
+        "VNH": "#0f766e",
+        "CQ": "#7e22ce",
+        "A.CẢNH": "#b45309",
+        "Hùng TT": "#4338ca",
+        "A Cảnh": "#c2410c",
+        "A Tước": "#0369a1"
+      },
+      orders: [
+        {
+          id: "ORD-EDGE",
+          customer: "EDGE",
+          tMinus: -5,
+          deliveryDate: "22/11/2026",
+          contDate: "-",
+          remainingDays: "-5d",
+          isDelayed: true,
+          delaySummary: "VNH Đơn 26.12 (T- = -5d): chưa làm bao bì, các mã khung sắt chậm",
+          delayAlerts: [
+            {
+              factory: "VNH",
+              orderCode: "Đơn 26.12",
+              tMinus: "-5d",
+              deliveryText: "giao 22/11/2026",
+              detail: "25/11: xưởng chưa làm bao bì. Chú ý giục bao bì, packing; 19/11: các mã khung sắt chậm",
+              statusLabel: "Cần giục bao bì, packing & tiến độ khung sắt gấp"
+            }
+          ],
+          progressByFactory: {
+            "AN": 100,
+            "LTU": 100,
+            "VNH": 70,
+            "Hùng TT": 50
+          },
+          factoryDetails: [
+            {
+              factory: "AN",
+              orderCode: "Đơn 26.15",
+              tMinus: "-5d",
+              progress: "100%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [
+                { text: "02/11: Xưởng xác nhận kích thước bao bì vẫn như đơn cũ", highlight: false },
+                { text: "02/11: còn 300 chiếc mã đèn cối chưa làm xong khung sắt.", highlight: false },
+                { text: "25/11 còn 300 đèn đay và khinh khí cầu chưa về xưởng", highlight: false },
+                { text: "26/11: đã đủ 100% hàng thô về xưởng", highlight: true }
+              ],
+              prevNotes: "Đơn trước giao đúng lịch, bao bì giữ nguyên quy cách chuẩn.",
+              notes: "-"
+            },
+            {
+              factory: "VNH",
+              orderCode: "Đơn 26.12",
+              tMinus: "-5d",
+              progress: "70%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [
+                { text: "13/11 xin Mạnh thông tin packing làm bao bì.", highlight: false },
+                { text: "19/11: Các mã khung sắt chậm nên hàng cuối tháng mới vào đủ hàng thô.", highlight: false },
+                { text: "25/11: xưởng chưa làm bao bì. Chú ý giục bao bì, packing.", highlight: true }
+              ],
+              prevNotes: "Cần đối chiếu số lượng khung sắt với đơn 26.11/26.15 để tránh nhầm mã.",
+              notes: "-"
+            },
+            {
+              factory: "LTU",
+              orderCode: "Đơn 26.11",
+              tMinus: "-5d",
+              progress: "100%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [
+                { text: "29/10: đã gửi thông tin làm bao bì.", highlight: false },
+                { text: "23/11: đã về đủ hàng thô 100%", highlight: true }
+              ],
+              prevNotes: "-",
+              notes: "-"
+            },
+            {
+              factory: "Hùng TT",
+              orderCode: "E",
+              tMinus: "-5d",
+              progress: "50%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              prevNotes: "-",
+              notes: "-"
+            }
+          ]
+        },
+        {
+          id: "ORD-IROVY",
+          customer: "IROVY",
+          tMinus: 1,
+          deliveryDate: "28/11/2026",
+          contDate: "-",
+          remainingDays: "-",
+          isDelayed: false,
+          delaySummary: "-",
+          delayAlerts: [],
+          progressByFactory: {
+            "AN": 60
+          },
+          factoryDetails: [
+            {
+              factory: "AN",
+              orderCode: "Đơn 26.16",
+              tMinus: "1d",
+              progress: "60%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [
+                { text: "04/11: 2 mã tỏi đang cho đan, 3 mã khế chưa xì khung sắt.", highlight: false },
+                { text: "Nghĩa báo ngày 28/11 đủ hàng về xưởng.", highlight: true }
+              ],
+              notes: "1) Shipping mark sale gửi sau..\n2) Hàng đóng chồng lên nhau, bọc giấy+túi nilon. Thùng gấp gọn chuyển kèm cont.\n3) Đóng cont xong kẹp chì tạm.\n4) Chốt sớm CBM để đặt thêm hàng."
+            }
+          ]
+        },
+        {
+          id: "ORD-BARCELONA",
+          customer: "BARCELONA LED",
+          tMinus: 15,
+          deliveryDate: "12/12/2026",
+          contDate: "12/12/2026",
+          remainingDays: "15d",
+          isDelayed: false,
+          delaySummary: "-",
+          delayAlerts: [],
+          progressByFactory: {
+            "LTU": 30,
+            "CQ": 60
+          },
+          factoryDetails: [
+            {
+              factory: "LTU",
+              orderCode: "Đơn 26.10",
+              tMinus: "15d",
+              progress: "30%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [
+                { text: "20/11: gửi thông tin bao bì cho xưởng làm.", highlight: false },
+                { text: "23/11: đủ 2 mã đèn tăm và tua rua, mã đèn nấm được 1500 cái.", highlight: true }
+              ],
+              notes: "1) Chia 3 lần đóng cont, 3cont/lần • Lần 1: 12/12/2026 • Lần 2: 27/12/2026 • Lần 3: 11/01/2027\n2) Tag giấy nâu 10x6cm cho LM172,LM179,LM180.\n3) Dán 1 decal A4 các mã LM 172,LM179,LM180.\n4) Mã LM178 đóng 1pcs/ctn, in shipping mark A4 lên 1 mặt, không cần treo tag.\n5) Sau khi đóng lần 2, chốt lại số lượng thừa thiếu LM178 để sx thêm bớt."
+            },
+            {
+              factory: "CQ",
+              orderCode: "Đơn 26.07",
+              tMinus: "15d",
+              progress: "60%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [
+                { text: "02/11: đã gửi thông tin làm bao bì.", highlight: false },
+                { text: "25/11: Xưởng đã về gần đủ hàng.", highlight: false },
+                { text: "Xưởng báo 05/12 đủ hàng và có bao bì", highlight: false },
+                { text: "07/12 check tiến độ bao bì về xưởng.", highlight: true }
+              ],
+              notes: "-"
+            }
+          ]
+        },
+        {
+          id: "ORD-ASIAN",
+          customer: "ASIAN DESIGN HOUSE",
+          tMinus: 17,
+          deliveryDate: "14/12/2026",
+          contDate: "-",
+          remainingDays: "-",
+          isDelayed: false,
+          delaySummary: "-",
+          delayAlerts: [],
+          progressByFactory: {
+            "AN": 1,
+            "VNH": 1,
+            "A Cảnh": 1
+          },
+          factoryDetails: [
+            {
+              factory: "AN",
+              orderCode: "Đơn 26.17",
+              tMinus: "17d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "-"
+            },
+            {
+              factory: "VNH",
+              orderCode: "Đơn 26.13",
+              tMinus: "17d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "-"
+            },
+            {
+              factory: "A Cảnh",
+              orderCode: "ASI",
+              tMinus: "17d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "-"
+            }
+          ]
+        },
+        {
+          id: "ORD-MRSALICE",
+          customer: "MRS.ALICE",
+          tMinus: 19,
+          deliveryDate: "16/12/2026",
+          contDate: "-",
+          remainingDays: "-",
+          isDelayed: false,
+          delaySummary: "-",
+          delayAlerts: [],
+          progressByFactory: {
+            "CQ": 1,
+            "A Tước": 1
+          },
+          factoryDetails: [
+            {
+              factory: "CQ",
+              orderCode: "Đơn 26.08",
+              tMinus: "19d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "• Đóng gói quà 4pcs/set theo quy cách khách gửi"
+            },
+            {
+              factory: "A Tước",
+              orderCode: "ALI",
+              tMinus: "19d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "-"
+            }
+          ]
+        },
+        {
+          id: "ORD-GR8",
+          customer: "GR8",
+          tMinus: 34,
+          deliveryDate: "31/12/2026",
+          contDate: "-",
+          remainingDays: "-",
+          isDelayed: false,
+          delaySummary: "-",
+          delayAlerts: [],
+          progressByFactory: {
+            "AN": 1
+          },
+          factoryDetails: [
+            {
+              factory: "AN",
+              orderCode: "Đơn 26.18",
+              tMinus: "34d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "05/11",
+              final: "06/11 - 08/11",
+              tracking: [
+                { text: "Đã hoàn tất các đợt Inline/Final/Đóng cont trước đó của lô GR8.2.", highlight: true }
+              ],
+              notes: "-"
+            }
+          ]
+        },
+        {
+          id: "ORD-BEACHX",
+          customer: "BEACHX PRIVATE LIMITED",
+          tMinus: 36,
+          deliveryDate: "02/01/2027",
+          contDate: "-",
+          remainingDays: "-",
+          isDelayed: false,
+          delaySummary: "-",
+          delayAlerts: [],
+          progressByFactory: {
+            "VNH": 1
+          },
+          factoryDetails: [
+            {
+              factory: "VNH",
+              orderCode: "Đơn 26.19",
+              tMinus: "36d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "-"
+            }
+          ]
+        },
+        {
+          id: "ORD-GRUPO",
+          customer: "GRUPO",
+          tMinus: 39,
+          deliveryDate: "05/01/2027",
+          contDate: "-",
+          remainingDays: "-",
+          isDelayed: false,
+          delaySummary: "-",
+          delayAlerts: [],
+          progressByFactory: {
+            "AN": 1,
+            "LTU": 1,
+            "CQ": 1
+          },
+          factoryDetails: [
+            {
+              factory: "AN",
+              orderCode: "Đơn 26.20",
+              tMinus: "39d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "-"
+            },
+            {
+              factory: "LTU",
+              orderCode: "Đơn 26.21",
+              tMinus: "39d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "-"
+            },
+            {
+              factory: "CQ",
+              orderCode: "Đơn 26.22",
+              tMinus: "39d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "-"
+            }
+          ]
+        },
+        {
+          id: "ORD-DIXNEUF",
+          customer: "DIXNEUF",
+          tMinus: 94,
+          deliveryDate: "01/03/2027",
+          contDate: "-",
+          remainingDays: "-",
+          isDelayed: false,
+          delaySummary: "-",
+          delayAlerts: [],
+          progressByFactory: {
+            "VNH": 1
+          },
+          factoryDetails: [
+            {
+              factory: "VNH",
+              orderCode: "Đơn 26.23",
+              tMinus: "94d",
+              progress: "1%",
+              contDate: "-",
+              remaining: "-",
+              inline: "-",
+              final: "-",
+              tracking: [],
+              notes: "-"
+            }
+          ]
+        }
+      ],
+      calendarEvents: {
+        "2026-11-05": [{ title: "🔍 Inline: GR8.2 (AN)", color: "#0288d1", factory: "AN" }],
+        "2026-11-06": [{ title: "⭐ Final: GR8.2 (AN)", color: "#d32f2f", factory: "AN" }],
+        "2026-11-07": [{ title: "⭐ Final: GR8.2 (AN)", color: "#d32f2f", factory: "AN" }],
+        "2026-11-08": [{ title: "⭐ Final: GR8.2 (AN)", color: "#d32f2f", factory: "AN" }],
+        "2026-11-09": [{ title: "🚛 Đóng cont: GR8.2 (AN)", color: "#7b1fa2", factory: "AN" }],
+        "2026-11-19": [
+          { title: "⭐ Final: MAGNOLIAS (CQ)", color: "#d32f2f", factory: "CQ" },
+          { title: "⭐ Final: MAGNOLIAS (VNH)", color: "#d32f2f", factory: "VNH" }
+        ],
+        "2026-11-20": [
+          { title: "⭐ Final: MAGNOLIAS (AN)", color: "#d32f2f", factory: "AN" },
+          { title: "⭐ Final: MAGNOLIAS (LTU)", color: "#d32f2f", factory: "LTU" }
+        ],
+        "2026-11-23": [
+          { title: "🚛 Đóng cont: MAGNOLIAS (AN)", color: "#7b1fa2", factory: "AN" },
+          { title: "🚛 Đóng cont: MAGNOLIAS (VNH)", color: "#7b1fa2", factory: "VNH" }
+        ]
+      },
+      weatherLocations: [
+        {
+          locationName: "Tuy Lai, Mỹ Đức, Hà Nội",
+          factories: ["AN"],
+          forecasts: [
+            {
+              dateLabel: "T6 (27/11)",
+              tasks: [{ factory: "AN", text: "Theo dõi tiến độ & giục hoàn thiện khung/đan (IROVY / EDGE)" }],
+              icon: "⛅",
+              desc: "Ít mây, khô ráo",
+              temp: "17° - 25°",
+              humidity: 68,
+              rainHours: []
+            },
+            {
+              dateLabel: "T7 (28/11)",
+              tasks: [{ factory: "AN", text: "Chốt đợt hàng thô về xưởng (IROVY)" }],
+              icon: "🌤️",
+              desc: "Nắng nhẹ ban ngày",
+              temp: "18° - 26°",
+              humidity: 72,
+              rainHours: []
+            },
+            {
+              dateLabel: "CN (29/11)",
+              tasks: [{ factory: "AN", text: "Rà soát hàng thô chuẩn bị bao bì" }],
+              icon: "🌦️",
+              desc: "Mưa rào nhẹ chiều tối",
+              temp: "17° - 24°",
+              humidity: 84,
+              rainHours: ["17h", "18h"]
+            },
+            {
+              dateLabel: "T2 (30/11)",
+              tasks: [{ factory: "AN", text: "Check bao bì về xưởng (EDGE Đơn 26.15)" }],
+              icon: "☁️",
+              desc: "Nhiều mây, se lạnh",
+              temp: "16° - 22°",
+              humidity: 79,
+              rainHours: []
+            },
+            {
+              dateLabel: "T3 (01/12)",
+              tasks: [{ factory: "AN", text: "Update ảnh hàng hóa Sale lần 1 (ASIAN DESIGN HOUSE)" }],
+              icon: "☀",
+              desc: "Trời quang, nắng dịu",
+              temp: "16° - 24°",
+              humidity: 65,
+              rainHours: []
+            }
+          ]
+        },
+        {
+          locationName: "Đông Phương Yên, Chương Mỹ, Hà Nội",
+          factories: ["LTU"],
+          forecasts: [
+            {
+              dateLabel: "T6 (27/11)",
+              tasks: [{ factory: "LTU", text: "Theo dõi tiến độ đèn nấm & bao bì (BARCELONA LED)" }],
+              icon: "⛅",
+              desc: "Mây thay đổi",
+              temp: "17° - 25°",
+              humidity: 70,
+              rainHours: []
+            },
+            {
+              dateLabel: "T2 (30/11)",
+              tasks: [{ factory: "LTU", text: "Check lại bao bì về xưởng (EDGE Đơn 26.11)" }],
+              icon: "☁️",
+              desc: "Nhiều mây, không mưa",
+              temp: "16° - 22°",
+              humidity: 78,
+              rainHours: []
+            },
+            {
+              dateLabel: "T3 (01/12)",
+              tasks: [
+                { factory: "LTU", text: "Check tiến độ hàng hóa & hỏi lịch bao bì (BARCELONA LED)" },
+                { factory: "LTU", text: "Update ảnh hàng hóa cho Sale lần 1 (BARCELONA LED)" }
+              ],
+              icon: "🌤️",
+              desc: "Nắng nhẹ",
+              temp: "16° - 24°",
+              humidity: 66,
+              rainHours: []
+            }
+          ]
+        },
+        {
+          locationName: "Kim Sơn, Ninh Bình",
+          factories: ["VNH", "CQ"],
+          forecasts: [
+            {
+              dateLabel: "T6 (27/11)",
+              tasks: [
+                { factory: "VNH", text: "Check xưởng vào đủ hàng thô chưa? Còn thiếu mã nào? (EDGE)" },
+                { factory: "VNH", text: "Giục Mạnh làm bao bì & gửi lại packing (EDGE)" }
+              ],
+              icon: "🌦️",
+              desc: "Mưa nhỏ rải rác sáng sớm",
+              temp: "18° - 25°",
+              humidity: 85,
+              rainHours: ["06h", "07h"]
+            },
+            {
+              dateLabel: "T3 (01/12)",
+              tasks: [
+                { factory: "CQ", text: "Update ảnh hàng hóa cho Sale lần 1 (BARCELONA LED)" },
+                { factory: "VNH", text: "Update ảnh hàng hóa cho Sale lần 1 (ASIAN DESIGN HOUSE)" }
+              ],
+              icon: "⛅",
+              desc: "Ít mây, gió nhẹ",
+              temp: "17° - 24°",
+              humidity: 73,
+              rainHours: []
+            }
+          ]
+        }
+      ],
+      weeklyOverview: [
+        {
+          weekLabel: "Tuần này (23/11 – 27/11/2026)",
+          badge: "Đang diễn ra",
+          badgeClass: "bg-amber-100 text-amber-800 border-amber-200",
+          highlights: [
+            { day: "T4 (25/11)", task: "Update ảnh hàng hóa Sale lần 2 — IROVY (AN)", color: "#9e9e9e" },
+            { day: "T6 (27/11 - Hôm nay)", task: "Check hàng thô & giục bao bì/packing EDGE (VNH); check hàng thô IROVY (AN)", color: "#c62828" }
+          ]
+        },
+        {
+          weekLabel: "Tuần tới (30/11 – 04/12/2026)",
+          badge: "Sắp tới",
+          badgeClass: "bg-blue-100 text-blue-800 border-blue-200",
+          highlights: [
+            { day: "T2 (30/11)", task: "Check bao bì EDGE tại AN & LTU", color: "#c62828" },
+            { day: "T3 (01/12)", task: "Check tiến độ & Sale L1 cho BARCELONA LED, ASIAN DESIGN HOUSE", color: "#7b1fa2" },
+            { day: "T4 (02/12)", task: "Triển khai bao bì BARCELONA LED (LTU, CQ)", color: "#d32f2f" },
+            { day: "T5 (03/12)", task: "Update ảnh hàng hóa Sale L1 MRS.ALICE (CQ)", color: "#7b1fa2" },
+            { day: "T6 (04/12)", task: "Check hàng thô/bao bì BARCELONA LED (CQ) & triển khai bao bì ASIAN DESIGN HOUSE, MRS.ALICE", color: "#c62828" }
+          ]
+        }
+      ],
+      dailySchedule: [
+        {
+          dayLabel: "Thứ 2",
+          dateStr: "23/11",
+          weekGroup: "current",
+          status: "past",
+          tasks: []
+        },
+        {
+          dayLabel: "Thứ 3",
+          dateStr: "24/11",
+          weekGroup: "current",
+          status: "past",
+          tasks: [
+            { text: "Kiểm tra tiến độ khung sắt & hàng thô đầu tuần", customer: "EDGE", factory: "VNH", orderId: "Đơn 26.12", color: "#64748b" }
+          ]
+        },
+        {
+          dayLabel: "Thứ 4",
+          dateStr: "25/11",
+          weekGroup: "current",
+          status: "past",
+          tasks: [
+            { text: "Update ảnh hàng hóa Sale lần 2", customer: "IROVY", factory: "AN", orderId: "Đơn 26.16", color: "#64748b" }
+          ]
+        },
+        {
+          dayLabel: "Thứ 5",
+          dateStr: "26/11",
+          weekGroup: "current",
+          status: "past",
+          tasks: [
+            { text: "Xác nhận 100% hàng thô về xưởng AN", customer: "EDGE", factory: "AN", orderId: "Đơn 26.15", color: "#64748b" }
+          ]
+        },
+        {
+          dayLabel: "Thứ 6",
+          dateStr: "27/11",
+          weekGroup: "current",
+          status: "today",
+          tasks: [
+            { text: "Check xưởng vào đủ hàng thô chưa? Còn thiếu mã nào?", customer: "EDGE", factory: "VNH", orderId: "Đơn 26.12", color: "#c62828" },
+            { text: "Giục Mạnh làm bao bì & gửi lại packing", customer: "EDGE", factory: "VNH", orderId: "Đơn 26.12", color: "#c62828" },
+            { text: "Check đợt hàng thô về xưởng (hẹn 28/11)", customer: "IROVY", factory: "AN", orderId: "Đơn 26.16", color: "#1d4ed8" }
+          ]
+        },
+        {
+          dayLabel: "Thứ 2",
+          dateStr: "30/11",
+          weekGroup: "next",
+          status: "upcoming",
+          tasks: [
+            { text: "Check bao bì về xưởng (Đơn 26.15)", customer: "EDGE", factory: "AN", orderId: "Đơn 26.15", color: "#c62828" },
+            { text: "Check lại bao bì về xưởng (Đơn 26.11)", customer: "EDGE", factory: "LTU", orderId: "Đơn 26.11", color: "#c62828" }
+          ]
+        },
+        {
+          dayLabel: "Thứ 3",
+          dateStr: "01/12",
+          weekGroup: "next",
+          status: "upcoming",
+          tasks: [
+            { text: "Update ảnh hàng hóa Sale lần 1", customer: "ASIAN DESIGN HOUSE", factory: "AN", orderId: "Đơn 26.17", color: "#7b1fa2" },
+            { text: "Check tiến độ hàng hóa & hỏi lịch bao bì", customer: "BARCELONA LED", factory: "LTU", orderId: "Đơn 26.10", color: "#7b1fa2" },
+            { text: "Update ảnh hàng hóa cho Sale lần 1", customer: "BARCELONA LED", factory: "LTU", orderId: "Đơn 26.10", color: "#7b1fa2" },
+            { text: "Update ảnh hàng hóa cho Sale lần 1", customer: "BARCELONA LED", factory: "CQ", orderId: "Đơn 26.07", color: "#7b1fa2" },
+            { text: "Update ảnh hàng hóa cho Sale lần 1", customer: "ASIAN DESIGN HOUSE", factory: "VNH", orderId: "Đơn 26.13", color: "#7b1fa2" }
+          ]
+        },
+        {
+          dayLabel: "Thứ 4",
+          dateStr: "02/12",
+          weekGroup: "next",
+          status: "upcoming",
+          tasks: [
+            { text: "Triển khai làm bao bì cho đơn hàng", customer: "BARCELONA LED", factory: "LTU", orderId: "Đơn 26.10", color: "#d32f2f" },
+            { text: "Triển khai làm bao bì cho đơn hàng", customer: "BARCELONA LED", factory: "CQ", orderId: "Đơn 26.07", color: "#d32f2f" }
+          ]
+        },
+        {
+          dayLabel: "Thứ 5",
+          dateStr: "03/12",
+          weekGroup: "next",
+          status: "upcoming",
+          tasks: [
+            { text: "Update ảnh hàng hóa cho Sale lần 1", customer: "MRS.ALICE", factory: "CQ", orderId: "Đơn 26.08", color: "#7b1fa2" }
+          ]
+        },
+        {
+          dayLabel: "Thứ 6",
+          dateStr: "04/12",
+          weekGroup: "next",
+          status: "upcoming",
+          tasks: [
+            { text: "Check hàng thô và bao bì về xưởng", customer: "BARCELONA LED", factory: "CQ", orderId: "Đơn 26.07", color: "#c62828" },
+            { text: "Triển khai làm bao bì cho đơn hàng", customer: "ASIAN DESIGN HOUSE", factory: "AN, VNH, A Cảnh", orderId: "Đơn 26.17 / 26.13 / ASI", color: "#d32f2f" },
+            { text: "Triển khai làm bao bì cho đơn hàng", customer: "MRS.ALICE", factory: "CQ, A Tước", orderId: "Đơn 26.08 / ALI", color: "#d32f2f" }
+          ]
+        }
+      ]
+    };
+
+    /**
+     * HÀM TIỆN ÍCH CHUNG & LỌC XƯỞNG
+     */
+    function matchesFactoryFilter(factoryLabel) {
+      const sel = appState.selectedFactory;
+      if (!sel || sel === "ALL") return true;
+      const lbl = String(factoryLabel || "");
+      const mainFactories = ["AN", "LTU", "VNH", "CQ"];
+
+      if (sel === "Xưởng lẻ") {
+        // Khớp nếu nhãn xưởng không nằm thuần túy trong 4 xưởng chính
+        const parts = lbl.split(",").map(p => p.trim());
+        return parts.some(p => p && !mainFactories.includes(p));
+      }
+
+      const parts = lbl.split(",").map(p => p.trim());
+      return parts.includes(sel) || lbl === sel;
+    }
+
+    function showToast(message, icon = "✅") {
+      const banner = document.getElementById("toastBanner");
+      const iconEl = document.getElementById("toastIcon");
+      const textEl = document.getElementById("toastText");
+      if (!banner || !iconEl || !textEl) return;
+
+      iconEl.textContent = icon;
+      textEl.textContent = message;
+      banner.classList.remove("hidden");
+
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        banner.classList.add("hidden");
+      }, 2800);
+    }
+
+    function setActiveTab(tabId) {
+      appState.activeTab = tabId;
+
+      document.querySelectorAll(".tab-view").forEach(sec => {
+        if (sec.id === `view-${tabId}`) {
+          sec.classList.remove("hidden");
+        } else {
+          sec.classList.add("hidden");
+        }
+      });
+
+      document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+        const isActive = btn.dataset.tab === tabId;
+        btn.className = isActive
+          ? "nav-tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border text-left sm:text-center bg-blue-950 text-white border-blue-950 shadow-xs"
+          : "nav-tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border text-left sm:text-center bg-white hover:bg-slate-50 text-slate-700 border-slate-200";
+      });
+    }
+
+    function loadInitialData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && Array.isArray(parsed.orders)) {
+            return { ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed };
+          }
+        }
+      } catch (e) {
+        // Bỏ qua lỗi đọc localStorage và dùng dữ liệu mặc định
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA));
+    }
+
+    function saveDataToStorage(dataObj) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataObj));
+      } catch (e) {
+        // Bỏ qua nếu bộ nhớ đầy hoặc bị chặn
+      }
+    }
+
+    /**
+     * PHÂN TÍCH NỘI DUNG DÁN TỪ GMAIL (JSON, HTML EMAIL HOẶC VĂN BẢN)
+     */
+    function parseGmailOrJsonInput(rawText) {
+      const trimmed = (rawText || "").trim();
+      if (!trimmed) {
+        throw new Error("Vui lòng dán nội dung báo cáo từ Gmail hoặc JSON.");
+      }
+
+      // 1. Thử parse JSON trực tiếp
+      if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+        const parsed = JSON.parse(trimmed);
+        if (!parsed || !Array.isArray(parsed.orders)) {
+          throw new Error("JSON phải là một đối tượng có trường 'orders' dạng mảng.");
+        }
+        return { ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed };
+      }
+
+      // 2. Nếu dán HTML từ Gmail, bóc tách text sạch
+      let plainText = trimmed;
+      if (/<[a-z][\s\S]*>/i.test(trimmed)) {
+        const doc = new DOMParser().parseFromString(trimmed, "text/html");
+        plainText = (doc.body && doc.body.innerText) ? doc.body.innerText : trimmed.replace(/<[^>]+>/g, " ");
+      }
+
+      const nextData = JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA));
+      const dateMatch = plainText.match(/(Thứ\s+[A-Za-zÀ-ỹ]+,\s*ngày\s*\d{1,2}\/\d{1,2}\/\d{4})/i);
+      if (dateMatch) {
+        nextData.reportDate = dateMatch[1];
+      }
+
+      // Trích xuất các dòng cập nhật ngày dd/mm và gắn vào đơn hàng tương ứng
+      const lines = plainText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const updateLines = lines.filter(l => /^\d{1,2}\/\d{1,2}\s*:/.test(l) || /cập nhật|bao bì|hàng thô|đóng cont/i.test(l));
+
+      if (updateLines.length > 0 && nextData.orders.length > 0) {
+        const firstDetail = nextData.orders[0].factoryDetails[0];
+        if (firstDetail) {
+          const newItems = updateLines.slice(0, 6).map(txt => ({
+            text: `[Gmail] ${txt}`,
+            highlight: true
+          }));
+          firstDetail.tracking = [...newItems, ...(firstDetail.tracking || [])];
+        }
+      }
+
+      return nextData;
+    }
+
+    /**
+     * TRẠNG THÁI ỨNG DỤNG
+     */
+    let appState = {
+      activeTab: "calendar-weather",
+      selectedFactory: "ALL",
+      selectedCustomer: "ALL",
+      statusFilter: "ALL",
+      searchQuery: "",
+      planMode: "both",
+      expandedOrderIds: new Set(["ORD-EDGE", "ORD-IROVY", "ORD-BARCELONA"]),
+      data: loadInitialData()
+    };
+
+    /**
+     * RENDER CÁC THÀNH PHẦN GIAO DIỆN
+     */
+    function renderSourceLinksBar() {
+      const bar = document.getElementById("sourceLinksBar");
+      const links = appState.data.sourceLinks || [];
+      const chips = links.map((lnk, idx) => `
+        <a
+          href="${lnk.url || "#"}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 font-semibold transition"
+          title="Mở link nguồn ${lnk.label}"
+        >
+          <span>🔗</span>
+          <span>${lnk.label}</span>
+        </a>
+      `).join("");
+
+      bar.innerHTML = `
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="font-bold text-slate-600 mr-1">📌 Link dữ liệu nguồn:</span>
+          ${chips}
+        </div>
+        <button
+          id="editSourceLinksBtn"
+          type="button"
+          class="text-[11px] font-semibold text-slate-600 hover:text-blue-900 underline cursor-pointer"
+        >
+          Sửa link
+        </button>
+      `;
+
+      document.getElementById("editSourceLinksBtn").addEventListener("click", () => {
+        openJsonModalWithTabHint("Chỉnh sửa mảng 'sourceLinks' trong JSON để cập nhật đường dẫn Drive/Sheet thực tế.");
+      });
+    }
+
+    function syncCustomerFilterOptions() {
+      const select = document.getElementById("customerFilter");
+      if (!select) return;
+      const currentVal = appState.selectedCustomer;
+      const customers = Array.from(new Set((appState.data.orders || []).map(o => o.customer)));
+
+      select.innerHTML = `<option value="ALL">Tất cả khách hàng (${customers.length})</option>` +
+        customers.map(c => `<option value="${c}">${c}</option>`).join("");
+
+      if (customers.includes(currentVal)) {
+        select.value = currentVal;
+      } else {
+        appState.selectedCustomer = "ALL";
+        select.value = "ALL";
+      }
+    }
+
+    function renderStatusFilterButtons() {
+      document.querySelectorAll(".status-filter-btn").forEach(btn => {
+        const active = btn.dataset.statusFilter === appState.statusFilter;
+        if (active) {
+          btn.className = "status-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer bg-emerald-800 text-white border-emerald-800 shadow-2xs";
+        } else {
+          btn.className = "status-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200";
+        }
+      });
+    }
+
+    function setPlanMode(mode) {
+      appState.planMode = mode;
+
+      document.querySelectorAll(".plan-mode-btn").forEach(btn => {
+        const active = btn.dataset.planMode === mode;
+        btn.className = active
+          ? "plan-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer bg-blue-800 text-white shadow-2xs"
+          : "plan-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900";
+      });
+
+      const weekBlock = document.getElementById("weeklyOverviewBlock");
+      const dayBlock = document.getElementById("dailyScheduleBlock");
+
+      if (weekBlock && dayBlock) {
+        if (mode === "both") {
+          weekBlock.classList.remove("hidden");
+          dayBlock.classList.remove("hidden");
+        } else if (mode === "week") {
+          weekBlock.classList.remove("hidden");
+          dayBlock.classList.add("hidden");
+        } else {
+          weekBlock.classList.add("hidden");
+          dayBlock.classList.remove("hidden");
+        }
+      }
+    }
+
+    /**
+     * RENDER KPI STRIP
+     */
+    function renderKPIs() {
+      const { orders, calendarEvents, dailySchedule, reportDate } = appState.data;
+      document.getElementById("reportDateLabel").textContent =
+        `${reportDate} • Lọc xưởng: ${appState.selectedFactory === "ALL" ? "Tất cả (AN, LTU, VNH, CQ, Xưởng lẻ)" : appState.selectedFactory}`;
+
+      const filteredOrders = orders.filter(o => {
+        if (appState.selectedFactory === "ALL") return true;
+        return o.factoryDetails.some(fd => matchesFactoryFilter(fd.factory));
+      });
+
+      const delayedCount = filteredOrders.filter(o => o.isDelayed).length;
+
+      let visitCount = 0;
+      Object.values(calendarEvents || {}).forEach(list => {
+        list.forEach(ev => {
+          if (matchesFactoryFilter(ev.factory)) visitCount++;
+        });
+      });
+
+      const todayRow = (dailySchedule || []).find(d => d.status === "today");
+      const todayTasks = todayRow
+        ? todayRow.tasks.filter(t => matchesFactoryFilter(t.factory))
+        : [];
+
+      document.getElementById("kpiOrdersCount").textContent = filteredOrders.length;
+      document.getElementById("kpiDelayedCount").textContent = delayedCount;
+      document.getElementById("kpiVisitsCount").textContent = visitCount;
+      document.getElementById("kpiTodayTasksCount").textContent = todayTasks.length;
+    }
+
+    /**
+     * RENDER TAB 1: LỊCH 2 THÁNG & DỰ BÁO THỜI TIẾT
+     */
+    function renderCalendarAndWeather() {
+      const calContainer = document.getElementById("twoMonthCalendarContainer");
+      const todayISO = appState.data.todayISO || "2026-11-27";
+      const eventsMap = appState.data.calendarEvents || {};
+
+      const months = [
+        { year: 2026, monthIndex: 10, title: "📅 THÁNG 11, 2026", daysInMonth: 30, firstDayDow: 0 }, // 01/11/2026 là Chủ Nhật
+        { year: 2026, monthIndex: 11, title: "📅 THÁNG 12, 2026", daysInMonth: 31, firstDayDow: 2 }  // 01/12/2026 là Thứ 3
+      ];
+
+      const dayHeaders = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+
+      calContainer.innerHTML = months.map(m => {
+        let cellsHtml = "";
+        const totalSlots = Math.ceil((m.firstDayDow + m.daysInMonth) / 7) * 7;
+
+        for (let slot = 0; slot < totalSlots; slot++) {
+          const dayNum = slot - m.firstDayDow + 1;
+          const colDow = slot % 7;
+          const isWeekend = colDow === 0 || colDow === 6;
+
+          if (dayNum < 1 || dayNum > m.daysInMonth) {
+            cellsHtml += `<div class="min-h-[68px] sm:min-h-[82px] bg-slate-50/70 border border-slate-200/70 rounded-lg p-1"></div>`;
+            continue;
+          }
+
+          const mm = String(m.monthIndex + 1).padStart(2, "0");
+          const dd = String(dayNum).padStart(2, "0");
+          const dateISO = `${m.year}-${mm}-${dd}`;
+          const isToday = dateISO === todayISO;
+          const isPast = dateISO < todayISO;
+
+          const dayEvents = (eventsMap[dateISO] || []).filter(ev => matchesFactoryFilter(ev.factory));
+          const hasEvents = dayEvents.length > 0;
+
+          let boxClass = "min-h-[68px] sm:min-h-[82px] border rounded-lg p-1 sm:p-1.5 flex flex-col justify-between transition ";
+          if (isToday) {
+            boxClass += "bg-amber-50/90 border-2 border-red-600 shadow-xs";
+          } else if (isWeekend) {
+            boxClass += "weekend-hatch border-slate-200";
+          } else {
+            boxClass += "bg-white border-slate-200/90";
+          }
+
+          if (isPast) {
+            boxClass += " opacity-65";
+          }
+
+          const numClass = isToday
+            ? "inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white text-xs font-extrabold"
+            : hasEvents
+              ? "inline-flex items-center justify-center w-6 h-6 rounded-full border-2 border-red-600 bg-red-50 text-red-700 text-xs font-extrabold"
+              : isWeekend
+                ? "text-xs font-bold text-red-600 px-1"
+                : isPast
+                  ? "text-xs font-semibold text-slate-400 px-1"
+                  : "text-xs font-bold text-slate-800 px-1";
+
+          const eventsHtml = dayEvents.map(ev => `
+            <div
+              class="mt-1 text-[10px] sm:text-[11px] font-bold text-white px-1.5 py-0.5 rounded leading-tight truncate shadow-2xs"
+              style="background-color: ${ev.color || "#1d4ed8"};"
+              title="${ev.title}"
+            >
+              ${ev.title}
+            </div>
+          `).join("");
+
+          cellsHtml += `
+            <div class="${boxClass}">
+              <div class="flex items-center justify-between gap-1">
+                ${isToday ? `<span class="text-[9px] font-extrabold uppercase bg-red-600 text-white px-1.5 py-0.5 rounded">Hôm nay</span>` : `<span></span>`}
+                <span class="${numClass}">${dayNum}</span>
+              </div>
+              <div class="mt-0.5">${eventsHtml}</div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="border border-blue-200/80 rounded-xl overflow-hidden bg-slate-50/40">
+            <div class="bg-blue-50 text-blue-950 font-extrabold text-sm sm:text-base text-center py-2.5 border-b border-blue-200">
+              ${m.title}
+            </div>
+            <div class="p-2">
+              <div class="grid grid-cols-7 gap-1 mb-1 text-center text-[11px] font-bold">
+                ${dayHeaders.map((h, idx) => `<div class="${idx === 0 || idx === 6 ? "text-red-600" : "text-slate-600"} py-1">${h}</div>`).join("")}
+              </div>
+              <div class="grid grid-cols-7 gap-1">
+                ${cellsHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // Render Thời tiết 5 ngày tới
+      const weatherContainer = document.getElementById("weatherForecastContainer");
+      const locations = (appState.data.weatherLocations || [])
+        .map(loc => {
+          const filteredForecasts = loc.forecasts
+            .map(fc => ({
+              ...fc,
+              filteredTasks: (fc.tasks || []).filter(t => matchesFactoryFilter(t.factory))
+            }))
+            .filter(fc => appState.selectedFactory === "ALL" || fc.filteredTasks.length > 0);
+          return { ...loc, filteredForecasts };
+        })
+        .filter(loc => loc.filteredForecasts.length > 0);
+
+      if (locations.length === 0) {
+        weatherContainer.innerHTML = `
+          <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-semibold text-center">
+            ✅ Không có lịch công tác / dự báo thời tiết phù hợp bộ lọc hiện tại trong 5 ngày tới.
+          </div>
+        `;
+        return;
+      }
+
+      weatherContainer.innerHTML = locations.map(loc => {
+        const rowsHtml = loc.filteredForecasts.map(fc => {
+          const tasksToShow = appState.selectedFactory === "ALL" ? fc.tasks : fc.filteredTasks;
+          const tasksListHtml = tasksToShow.map(t => `
+            <div class="flex items-start gap-1.5 py-1 border-b border-dashed border-slate-100 last:border-none">
+              <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold shrink-0">
+                Xưởng ${t.factory}
+              </span>
+              <span class="text-xs text-slate-700 font-medium">${t.text}</span>
+            </div>
+          `).join("");
+
+          const humidityHtml = fc.humidity > 80
+            ? `<span class="text-orange-700 font-bold">⚠️ Độ ẩm: ${fc.humidity}%</span>`
+            : `<span class="text-slate-700">💧 Độ ẩm: ${fc.humidity}%</span>`;
+
+          const rainHtml = fc.rainHours && fc.rainHours.length > 0
+            ? `<div class="mt-1 text-red-600 font-bold text-[11px]">🕒 Mưa quanh các giờ: ${fc.rainHours.join(", ")}</div>`
+            : `<div class="mt-1 text-emerald-700 text-[11px]">☀️ Không mưa gián đoạn</div>`;
+
+          return `
+            <tr class="border-b border-slate-100 hover:bg-slate-50/70">
+              <td class="p-2.5 text-center font-bold text-xs text-slate-800 border-r border-slate-100 whitespace-nowrap align-top">
+                ${fc.dateLabel}
+              </td>
+              <td class="p-2.5 text-left border-r border-slate-100 align-top min-w-[210px]">
+                ${tasksListHtml || `<span class="text-xs text-slate-400">Lịch công tác xưởng</span>`}
+              </td>
+              <td class="p-2.5 text-center border-r border-slate-100 align-top whitespace-nowrap">
+                <div class="text-lg leading-none">${fc.icon}</div>
+                <div class="text-[11px] text-slate-600 font-medium mt-1">${fc.desc}</div>
+              </td>
+              <td class="p-2.5 text-center font-extrabold text-xs text-slate-800 border-r border-slate-100 whitespace-nowrap align-top">
+                ${fc.temp}
+              </td>
+              <td class="p-2.5 text-left text-xs align-top min-w-[155px]">
+                ${humidityHtml}
+                ${rainHtml}
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        return `
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="bg-teal-700 text-white px-3.5 py-2 font-bold text-xs sm:text-sm flex items-center justify-between gap-2">
+              <span>📍 Vị trí xưởng: ${loc.locationName}</span>
+              <span class="text-[11px] bg-white/15 px-2 py-0.5 rounded-md">Xưởng: ${loc.factories.join(", ")}</span>
+            </div>
+            <div class="table-scroll overflow-x-auto">
+              <table class="w-full border-collapse bg-white text-left">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 text-[11px] font-bold uppercase border-b border-slate-200">
+                    <th class="p-2.5 text-center">Ngày</th>
+                    <th class="p-2.5">Nhiệm vụ</th>
+                    <th class="p-2.5 text-center">Thời tiết</th>
+                    <th class="p-2.5 text-center">Nhiệt độ</th>
+                    <th class="p-2.5">Chỉ số khác</th>
+                  </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    /**
+     * RENDER TAB 2: TIẾN ĐỘ ĐƠN HÀNG + CẢNH BÁO CHẬM TIẾN ĐỘ
+     */
+    function renderProgressMatrix() {
+      const container = document.getElementById("progressMatrixContainer");
+      const alertContainer = document.getElementById("delayAlertContainer");
+      const { orders, factories, factoryColors } = appState.data;
+
+      const visibleFactories = appState.selectedFactory === "ALL"
+        ? factories
+        : factories.filter(f => matchesFactoryFilter(f));
+
+      const filteredOrders = orders.filter(o => {
+        if (appState.selectedFactory === "ALL") return true;
+        return o.factoryDetails.some(fd => matchesFactoryFilter(fd.factory));
+      });
+
+      const headerCells = [
+        `<th class="p-2.5 text-left font-bold text-slate-900 bg-white border-b border-r border-slate-200 sticky left-0 z-10 min-w-[140px]">Đơn hàng</th>`,
+        ...visibleFactories.map(f => `<th class="p-2.5 text-center font-bold text-slate-800 bg-slate-50 border-b border-r border-slate-200 min-w-[68px]">${f}</th>`),
+        `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-300 border-b border-r border-slate-200 min-w-[56px]">T-</th>`,
+        `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-200 border-b border-r border-slate-200 min-w-[115px]">Giao dự kiến</th>`,
+        `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-100 border-b border-r border-slate-200 min-w-[130px]">Xưởng sản xuất</th>`,
+        `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-300 border-b border-r border-slate-200 min-w-[82px]">Đi Cont</th>`,
+        `<th class="p-2.5 text-center font-bold text-slate-900 bg-yellow-200 border-b border-slate-200 min-w-[64px]">Còn lại</th>`
+      ].join("");
+
+      const bodyRows = filteredOrders.map(o => {
+        const activeFacs = o.factoryDetails.map(fd => fd.factory);
+        const activeFacsFiltered = appState.selectedFactory === "ALL"
+          ? activeFacs
+          : activeFacs.filter(f => matchesFactoryFilter(f));
+
+        const factoryColsHtml = visibleFactories.map(f => {
+          const val = o.progressByFactory ? o.progressByFactory[f] : undefined;
+          if (!val && val !== 0) {
+            return `<td class="p-2 text-center bg-slate-50/70 text-slate-300 border-b border-r border-slate-200 text-xs">—</td>`;
+          }
+          const bg = factoryColors[f] || "#0284c7";
+          return `
+            <td class="p-2 text-center font-extrabold text-white border-b border-r border-slate-200 text-xs" style="background-color: ${bg};">
+              ${val}%
+            </td>
+          `;
+        }).join("");
+
+        const tColor = o.tMinus < 0 ? "text-red-600 font-extrabold" : "text-slate-800 font-bold";
+        const tDisplay = `${o.tMinus}d`;
+
+        const activeBadges = activeFacsFiltered.length > 0
+          ? activeFacsFiltered.map(f => {
+              const bg = factoryColors[f] || "#0284c7";
+              return `<span class="inline-block text-[10px] font-bold text-white px-1.5 py-0.5 rounded mr-1 mb-0.5" style="background-color:${bg};">${f}</span>`;
+            }).join("")
+          : `<span class="text-xs text-slate-400">—</span>`;
+
+        return `
+          <tr class="hover:bg-blue-50/30 transition">
+            <td class="p-2.5 text-left font-bold text-slate-900 bg-white border-b border-r border-slate-200 sticky left-0 z-10 text-xs sm:text-sm whitespace-nowrap">
+              <div class="flex items-center gap-1.5">
+                <span>${o.customer}</span>
+                ${o.isDelayed ? `<span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-red-100 text-red-700 border border-red-200">CHẬM</span>` : ""}
+              </div>
+            </td>
+            ${factoryColsHtml}
+            <td class="p-2.5 text-center border-b border-r border-slate-200 text-xs whitespace-nowrap ${tColor}">${tDisplay}</td>
+            <td class="p-2.5 text-center border-b border-r border-slate-200 text-xs font-semibold text-slate-700 whitespace-nowrap">${o.deliveryDate || "-"}</td>
+            <td class="p-2.5 text-left border-b border-r border-slate-200">${activeBadges}</td>
+            <td class="p-2.5 text-center border-b border-r border-slate-200 text-xs font-bold text-teal-800 whitespace-nowrap">${o.contDate || "-"}</td>
+            <td class="p-2.5 text-center border-b border-slate-200 text-xs font-bold text-orange-700 whitespace-nowrap">${o.remainingDays || "-"}</td>
+          </tr>
+        `;
+      }).join("");
+
+      container.innerHTML = `
+        <table class="w-full border-collapse bg-white text-xs">
+          <thead><tr>${headerCells}</tr></thead>
+          <tbody>${bodyRows}</tbody>
+        </table>
+      `;
+
+      // Hộp cảnh báo chậm tiến độ
+      const delayedOrders = filteredOrders.filter(o => o.isDelayed && o.delayAlerts && o.delayAlerts.length > 0);
+      if (delayedOrders.length === 0) {
+        alertContainer.innerHTML = `
+          <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-semibold">
+            ✅ Không có cảnh báo chậm tiến độ nào theo bộ lọc hiện tại.
+          </div>
+        `;
+        return;
+      }
+
+      const itemsHtml = delayedOrders.map(o => {
+        const alertsLi = o.delayAlerts
+          .filter(al => matchesFactoryFilter(al.factory))
+          .map(al => `
+            <li class="mb-2 last:mb-0 text-xs sm:text-sm text-slate-800">
+              <span class="font-bold text-slate-900">Xưởng ${al.factory}</span>
+              <span class="text-slate-600">(${al.orderCode})</span>:
+              Kế hoạch <span class="font-semibold">T- = ${al.tMinus}</span> (${al.deliveryText}), báo:
+              <span class="italic text-slate-700">"${al.detail}"</span>
+              <div class="mt-0.5 text-red-700 font-bold">➔ Nguy cơ trễ tiến độ / ${al.statusLabel}!</div>
+            </li>
+          `).join("");
+
+        return `
+          <div class="pb-3 mb-3 border-b border-dashed border-amber-300 last:border-none last:mb-0 last:pb-0">
+            <div class="font-extrabold text-red-800 text-sm mb-1.5 flex items-center gap-1.5">
+              <span>📦</span>
+              <span>Đơn hàng: <span class="underline">${o.customer}</span></span>
+            </div>
+            <ul class="list-disc pl-5 space-y-1">${alertsLi}</ul>
+          </div>
+        `;
+      }).join("");
+
+      alertContainer.innerHTML = `
+        <div class="max-w-3xl mx-auto p-4 sm:p-5 rounded-xl bg-amber-50 border border-amber-200 border-l-4 border-l-orange-600 text-left shadow-2xs">
+          <div class="font-extrabold text-orange-800 text-xs sm:text-sm uppercase tracking-wide mb-3 flex items-center gap-1.5">
+            <span>🚨</span>
+            <span>Cảnh báo chậm tiến độ sản xuất (Từ Xưởng)</span>
+          </div>
+          ${itemsHtml}
+        </div>
+      `;
+    }
+
+    /**
+     * RENDER TAB 3: PHẦN II - THEO DÕI ĐƠN HÀNG CỦA QC (2 NHÓM: TRỄ HẠN & TRONG TẦM KIỂM SOÁT)
+     */
+    function renderOrderTrackingList() {
+      const container = document.getElementById("orderTrackingListContainer");
+      const query = (appState.searchQuery || "").trim().toLowerCase();
+
+      const matchedOrders = appState.data.orders.filter(o => {
+        if (appState.selectedCustomer !== "ALL" && o.customer !== appState.selectedCustomer) {
+          return false;
+        }
+        if (appState.statusFilter === "DELAYED" && !o.isDelayed) {
+          return false;
+        }
+        if (appState.statusFilter === "ONTIME" && o.isDelayed) {
+          return false;
+        }
+
+        const facMatch = appState.selectedFactory === "ALL" || o.factoryDetails.some(fd => matchesFactoryFilter(fd.factory));
+        if (!facMatch) return false;
+
+        if (!query) return true;
+        const inCustomer = o.customer.toLowerCase().includes(query);
+        const inFactories = o.factoryDetails.some(fd =>
+          fd.factory.toLowerCase().includes(query) ||
+          fd.orderCode.toLowerCase().includes(query) ||
+          (fd.prevNotes && fd.prevNotes.toLowerCase().includes(query)) ||
+          (fd.tracking || []).some(tr => tr.text.toLowerCase().includes(query)) ||
+          (fd.notes && fd.notes.toLowerCase().includes(query))
+        );
+        return inCustomer || inFactories;
+      });
+
+      if (matchedOrders.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-sm">
+            Không tìm thấy đơn hàng nào khớp với bộ lọc hiện tại.
+          </div>
+        `;
+        return;
+      }
+
+      const buildGroupHtml = (groupTitle, groupSub, list, isDelayedGroup) => {
+        if (list.length === 0) return "";
+
+        const headerBannerClass = isDelayedGroup
+          ? "bg-red-50 border-red-200 text-red-900"
+          : "bg-emerald-50/80 border-emerald-200 text-emerald-950";
+
+        const cardsHtml = list.map(o => {
+          const isExpanded = appState.expandedOrderIds.has(o.id);
+          const visibleDetails = o.factoryDetails.filter(fd => matchesFactoryFilter(fd.factory));
+
+          const tBadgeClass = o.tMinus < 0
+            ? "bg-red-100 text-red-700 border-red-200"
+            : o.tMinus <= 15
+              ? "bg-amber-100 text-amber-800 border-amber-200"
+              : "bg-slate-100 text-slate-700 border-slate-200";
+
+          const factoryCardsHtml = visibleDetails.map(fd => {
+            const facColor = appState.data.factoryColors[fd.factory] || "#0f172a";
+
+            const trackingHtml = fd.tracking && fd.tracking.length > 0
+              ? `<ul class="space-y-1.5">` + fd.tracking.map(tr => `
+                  <li class="text-xs sm:text-[13px] leading-relaxed flex items-start gap-2 ${tr.highlight ? "font-bold text-red-700 bg-red-50/70 px-2.5 py-1.5 rounded-lg border border-red-100" : "text-slate-700 px-1"}">
+                    <span class="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${tr.highlight ? "bg-red-600" : "bg-slate-400"}"></span>
+                    <span>${tr.text}</span>
+                  </li>
+                `).join("") + `</ul>`
+              : `<div class="text-xs text-slate-400 italic">Chưa có cập nhật theo dõi cho xưởng này.</div>`;
+
+            const hasPrevNote = fd.prevNotes && fd.prevNotes.trim() !== "" && fd.prevNotes.trim() !== "-";
+            const prevNoteHtml = hasPrevNote
+              ? `<div class="text-xs sm:text-[13px] text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-2.5 whitespace-pre-line leading-relaxed">${fd.prevNotes}</div>`
+              : `<div class="text-xs text-slate-400 italic">-</div>`;
+
+            const hasNote = fd.notes && fd.notes.trim() !== "" && fd.notes.trim() !== "-";
+            const noteHtml = hasNote
+              ? `<div class="text-xs sm:text-[13px] text-slate-800 bg-amber-50/70 border border-amber-200/80 rounded-xl p-2.5 whitespace-pre-line leading-relaxed">${fd.notes}</div>`
+              : `<div class="text-xs text-slate-400 italic">-</div>`;
+
+            return `
+              <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                <!-- Header từng xưởng + đầy đủ các chỉ số -->
+                <div class="px-3.5 py-2.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-extrabold text-white px-2.5 py-0.5 rounded-lg" style="background-color:${facColor};">
+                      Xưởng ${fd.factory}
+                    </span>
+                    <span class="text-xs sm:text-sm font-bold text-slate-800">${fd.orderCode}</span>
+                    <span class="text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-md">
+                      Tiến độ: ${fd.progress || "-"}
+                    </span>
+                    <span class="text-[11px] font-semibold text-purple-800 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md">
+                      Đi Cont: ${fd.contDate || "-"} • Còn: ${fd.remaining || "-"}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-600">
+                    <span>T-: <strong class="${o.tMinus < 0 ? "text-red-600" : "text-slate-900"}">${fd.tMinus}</strong></span>
+                    <span>• Giao: <strong>${o.deliveryDate || "-"}</strong></span>
+                    <span>• Inline: <strong>${fd.inline || "-"}</strong></span>
+                    <span>• Final: <strong>${fd.final || "-"}</strong></span>
+                  </div>
+                </div>
+
+                <!-- Nội dung Theo dõi đơn hàng, Lưu ý đơn trước & Ghi chú -->
+                <div class="p-3.5 grid grid-cols-1 lg:grid-cols-12 gap-4">
+                  <div class="lg:col-span-6">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-blue-900 mb-2 flex items-center gap-1.5">
+                      <span>📌</span>
+                      <span>Theo dõi đơn hàng</span>
+                    </div>
+                    ${trackingHtml}
+                  </div>
+
+                  <div class="lg:col-span-3 lg:border-l lg:border-slate-100 lg:pl-3">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-2 flex items-center gap-1.5">
+                      <span>🕰️</span>
+                      <span>Lưu ý đơn trước</span>
+                    </div>
+                    ${prevNoteHtml}
+                  </div>
+
+                  <div class="lg:col-span-3 lg:border-l lg:border-slate-100 lg:pl-3">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-amber-800 mb-2 flex items-center gap-1.5">
+                      <span>📝</span>
+                      <span>Ghi chú</span>
+                    </div>
+                    ${noteHtml}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join("");
+
+          return `
+            <div class="rounded-2xl border ${isExpanded ? (isDelayedGroup ? "border-red-300 shadow-xs" : "border-emerald-300 shadow-xs") : "border-slate-200"} bg-slate-50/50 overflow-hidden transition">
+              <button
+                type="button"
+                data-order-id="${o.id}"
+                class="order-accordion-btn w-full px-4 py-3.5 bg-white hover:bg-slate-50 flex items-center justify-between gap-3 text-left transition cursor-pointer"
+              >
+                <div class="flex items-center gap-2.5 flex-wrap min-w-0">
+                  <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold text-xs shrink-0">
+                    ${isExpanded ? "▾" : "▸"}
+                  </span>
+                  <span class="text-sm sm:text-base font-extrabold text-slate-900 truncate">${o.customer}</span>
+                  <span class="text-[11px] font-bold px-2 py-0.5 rounded-full border ${tBadgeClass}">
+                    T- = ${o.tMinus}d
+                  </span>
+                  <span class="text-xs text-slate-500 font-medium">
+                    • Giao: <strong>${o.deliveryDate}</strong>
+                  </span>
+                  ${o.isDelayed ? `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-600 text-white">Trễ hạn</span>` : ""}
+                </div>
+
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <span class="text-xs font-semibold text-slate-500 hidden sm:inline">
+                    ${visibleDetails.length} xưởng
+                  </span>
+                  <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                    ${isExpanded ? "Thu gọn" : "Xem chi tiết"}
+                  </span>
+                </div>
+              </button>
+
+              <div class="${isExpanded ? "block" : "hidden"} accordion-panel p-3 sm:p-4 space-y-3 border-t border-slate-200/80 bg-slate-50/70">
+                ${factoryCardsHtml}
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        return `
+          <div class="space-y-3">
+            <div class="px-3.5 py-2.5 rounded-xl border flex items-center justify-between gap-2 ${headerBannerClass}">
+              <div>
+                <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wide">${groupTitle}</h3>
+                <p class="text-[11px] opacity-85">${groupSub}</p>
+              </div>
+              <span class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-white/80 border border-current/20">
+                ${list.length} đơn
+              </span>
+            </div>
+            <div class="space-y-3">${cardsHtml}</div>
+          </div>
+        `;
+      };
+
+      const delayedList = matchedOrders.filter(o => o.isDelayed);
+      const ontimeList = matchedOrders.filter(o => !o.isDelayed);
+
+      container.innerHTML =
+        buildGroupHtml(
+          "🚨 ĐƠN TRỄ HẠN (Cần xử lý gấp)",
+          "Ưu tiên kiểm tra hàng thô, khung sắt, bao bì và packing để thu hẹp độ trễ",
+          delayedList,
+          true
+        ) +
+        buildGroupHtml(
+          "🛡️ TIẾN ĐỘ TRONG TẦM KIỂM SOÁT (T-)",
+          "Theo dõi mốc T-, lịch đóng cont, cập nhật ảnh Sale và chuẩn bị bao bì đúng hạn",
+          ontimeList,
+          false
+        );
+
+      container.querySelectorAll(".order-accordion-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const oid = btn.dataset.orderId;
+          if (appState.expandedOrderIds.has(oid)) {
+            appState.expandedOrderIds.delete(oid);
+          } else {
+            appState.expandedOrderIds.add(oid);
+          }
+          renderOrderTrackingList();
+        });
+      });
+
+      const allVisibleIds = matchedOrders.map(o => o.id);
+      const allExpanded = allVisibleIds.length > 0 && allVisibleIds.every(id => appState.expandedOrderIds.has(id));
+      const toggleAllBtn = document.getElementById("toggleAllOrdersBtn");
+      if (toggleAllBtn) {
+        toggleAllBtn.textContent = allExpanded ? "Thu gọn tất cả" : "Mở tất cả";
+      }
+    }
+
+    /**
+     * RENDER TAB 4: KẾ HOẠCH TRONG TUẦN (LỊCH TUẦN & LỊCH TỪNG NGÀY)
+     */
+    function renderWeeklyPlan() {
+      const overviewContainer = document.getElementById("weeklyOverviewCards");
+      const dailyContainer = document.getElementById("dailyScheduleContainer");
+
+      // 1. Lịch tuần (Tuần này & Tuần tới)
+      overviewContainer.innerHTML = (appState.data.weeklyOverview || []).map(wk => {
+        const listHtml = (wk.highlights || []).map(item => `
+          <div class="flex items-start gap-2.5 py-2 border-b border-slate-100 last:border-none">
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 shrink-0 mt-0.5">
+              ${item.day}
+            </span>
+            <span class="text-xs sm:text-[13px] font-semibold leading-snug" style="color: ${item.color || "#1e293b"};">
+              ${item.task}
+            </span>
+          </div>
+        `).join("");
+
+        return `
+          <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs flex flex-col">
+            <div class="flex items-center justify-between gap-2 pb-2.5 mb-2 border-b border-slate-100">
+              <h4 class="text-sm font-extrabold text-blue-950">${wk.weekLabel}</h4>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${wk.badgeClass || "bg-blue-50 text-blue-700 border-blue-200"}">
+                ${wk.badge}
+              </span>
+            </div>
+            <div class="divide-y divide-slate-50">${listHtml}</div>
+          </div>
+        `;
+      }).join("");
+
+      // 2. Lịch từng ngày (Thứ 2 - Thứ 6)
+      const rows = (appState.data.dailySchedule || []).map(day => {
+        const filteredTasks = (day.tasks || []).filter(t => matchesFactoryFilter(t.factory));
+        const isToday = day.status === "today";
+        const isPast = day.status === "past";
+        const isNextWeek = day.weekGroup === "next";
+
+        let rowBgClass = "bg-white";
+        let dayCellClass = "text-slate-800";
+        let todayBadge = "";
+
+        if (isToday) {
+          rowBgClass = "bg-amber-100/80";
+          dayCellClass = "text-red-700 font-extrabold";
+          todayBadge = `<span class="mt-1 inline-block text-[9px] font-extrabold uppercase bg-red-600 text-white px-1.5 py-0.5 rounded">Hôm nay</span>`;
+        } else if (isPast) {
+          rowBgClass = "bg-slate-50/90";
+          dayCellClass = "text-slate-400 italic";
+        } else if (isNextWeek) {
+          rowBgClass = "bg-sky-50/40";
+        }
+
+        if (filteredTasks.length === 0) {
+          return `
+            <tr class="${rowBgClass} border-b border-slate-200">
+              <td class="p-3 text-center border-r border-slate-200 align-top whitespace-nowrap ${dayCellClass}">
+                <div class="text-xs sm:text-sm font-bold">${day.dayLabel}</div>
+                <div class="text-xs">${day.dateStr}</div>
+                ${todayBadge}
+              </td>
+              <td colspan="4" class="p-3 text-center text-slate-400 text-xs font-medium">— Không có nhiệm vụ —</td>
+            </tr>
+          `;
+        }
+
+        return filteredTasks.map((ev, idx) => {
+          const textColor = isPast ? "#94a3b8" : (ev.color || "#1e293b");
+          const textStyle = isPast ? "color: #94a3b8; font-style: italic;" : `color: ${textColor};`;
+
+          return `
+            <tr class="${rowBgClass} border-b border-slate-200 hover:bg-blue-50/30 transition">
+              ${idx === 0 ? `
+                <td rowspan="${filteredTasks.length}" class="p-3 text-center border-r border-slate-200 align-middle whitespace-nowrap ${dayCellClass}">
+                  <div class="text-xs sm:text-sm font-bold">${day.dayLabel}</div>
+                  <div class="text-xs">${day.dateStr}</div>
+                  ${todayBadge}
+                </td>
+              ` : ""}
+              <td class="p-2.5 text-left font-bold text-xs sm:text-[13px] border-r border-slate-200 min-w-[230px]" style="${textStyle}">
+                ${ev.text}
+              </td>
+              <td class="p-2.5 text-center font-bold text-xs border-r border-slate-200 whitespace-nowrap ${isPast ? "text-slate-400" : "text-slate-900"}">
+                ${ev.customer}
+              </td>
+              <td class="p-2.5 text-center font-semibold text-xs border-r border-slate-200 whitespace-nowrap ${isPast ? "text-slate-400" : "text-slate-700"}">
+                ${ev.factory}
+              </td>
+              <td class="p-2.5 text-center text-xs whitespace-nowrap ${isPast ? "text-slate-400" : "text-slate-700"}">
+                ${ev.orderId}
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }).join("");
+
+      dailyContainer.innerHTML = `
+        <table class="w-full border-collapse bg-white text-xs">
+          <thead>
+            <tr class="bg-blue-800 text-white text-xs font-bold">
+              <th class="p-2.5 text-center border-r border-blue-700 w-28">Thứ / Ngày</th>
+              <th class="p-2.5 text-left border-r border-blue-700">Nhiệm vụ trọng tâm (Khác)</th>
+              <th class="p-2.5 text-center border-r border-blue-700">Khách</th>
+              <th class="p-2.5 text-center border-r border-blue-700">Xưởng</th>
+              <th class="p-2.5 text-center">Đơn hàng</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    /**
+     * RENDER TOÀN BỘ ỨNG DỤNG
+     */
+    function renderAll() {
+      syncCustomerFilterOptions();
+      renderStatusFilterButtons();
+      renderSourceLinksBar();
+      renderKPIs();
+      renderCalendarAndWeather();
+      renderProgressMatrix();
+      renderOrderTrackingList();
+      renderWeeklyPlan();
+    }
+
+    /**
+     * XỬ LÝ MODAL NHẬP / DÁN DỮ LIỆU TỪ GMAIL HOẶC JSON
+     */
+    function openJsonModal(hintText = "") {
+      document.getElementById("jsonTextarea").value = JSON.stringify(appState.data, null, 2);
+      const errBox = document.getElementById("jsonErrorMsg");
+      if (hintText) {
+        errBox.textContent = hintText;
+        errBox.className = "text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2";
+        errBox.classList.remove("hidden");
+      } else {
+        errBox.className = "hidden text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2";
+      }
+      const modal = document.getElementById("jsonModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function openJsonModalWithTabHint(hintText) {
+      openJsonModal(hintText);
+    }
+
+    function closeJsonModal() {
+      const modal = document.getElementById("jsonModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+      });
+
+      document.querySelectorAll(".plan-mode-btn").forEach(btn => {
+        btn.addEventListener("click", () => setPlanMode(btn.dataset.planMode));
+      });
+
+      document.querySelectorAll(".status-filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          appState.statusFilter = btn.dataset.statusFilter;
+          renderStatusFilterButtons();
+          renderOrderTrackingList();
+        });
+      });
+
+      const customerFilterEl = document.getElementById("customerFilter");
+      if (customerFilterEl) {
+        customerFilterEl.addEventListener("change", (e) => {
+          appState.selectedCustomer = e.target.value;
+          renderOrderTrackingList();
+        });
+      }
+
+      const factoryFilterEl = document.getElementById("factoryFilter");
+      if (factoryFilterEl) {
+        factoryFilterEl.addEventListener("change", (e) => {
+          appState.selectedFactory = e.target.value;
+          renderAll();
+          showToast(
+            e.target.value === "ALL" ? "Đang hiển thị tất cả xưởng" : `Đã lọc theo xưởng: ${e.target.value}`,
+            "🏭"
+          );
+        });
+      }
+
+      const orderSearchInputEl = document.getElementById("orderSearchInput");
+      if (orderSearchInputEl) {
+        orderSearchInputEl.addEventListener("input", (e) => {
+          appState.searchQuery = e.target.value;
+          renderOrderTrackingList();
+        });
+      }
+
+      const toggleAllOrdersBtnEl = document.getElementById("toggleAllOrdersBtn");
+      if (toggleAllOrdersBtnEl) {
+        toggleAllOrdersBtnEl.addEventListener("click", () => {
+          const visibleOrders = appState.data.orders.filter(o =>
+            appState.selectedFactory === "ALL" || o.factoryDetails.some(fd => matchesFactoryFilter(fd.factory))
+          );
+          const allExpanded = visibleOrders.length > 0 && visibleOrders.every(o => appState.expandedOrderIds.has(o.id));
+          if (allExpanded) {
+            appState.expandedOrderIds.clear();
+          } else {
+            visibleOrders.forEach(o => appState.expandedOrderIds.add(o.id));
+          }
+          renderOrderTrackingList();
+        });
+      }
+
+      const printReportBtnEl = document.getElementById("printReportBtn");
+      if (printReportBtnEl) {
+        printReportBtnEl.addEventListener("click", () => {
+          window.print();
+        });
+      }
+
+      const openJsonModalBtnEl = document.getElementById("openJsonModalBtn");
+      if (openJsonModalBtnEl) {
+        openJsonModalBtnEl.addEventListener("click", () => openJsonModal(""));
+      }
+
+      const closeJsonModalBtnEl = document.getElementById("closeJsonModalBtn");
+      if (closeJsonModalBtnEl) {
+        closeJsonModalBtnEl.addEventListener("click", closeJsonModal);
+      }
+
+      const cancelJsonModalBtnEl = document.getElementById("cancelJsonModalBtn");
+      if (cancelJsonModalBtnEl) {
+        cancelJsonModalBtnEl.addEventListener("click", closeJsonModal);
+      }
+
+      const resetSampleJsonBtnEl = document.getElementById("resetSampleJsonBtn");
+      if (resetSampleJsonBtnEl) {
+        resetSampleJsonBtnEl.addEventListener("click", () => {
+          const sampleCopy = JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA));
+          appState.data = sampleCopy;
+          saveDataToStorage(sampleCopy);
+          const jsonTextareaEl = document.getElementById("jsonTextarea");
+          if (jsonTextareaEl) {
+            jsonTextareaEl.value = JSON.stringify(sampleCopy, null, 2);
+          }
+          const jsonErrorMsgEl = document.getElementById("jsonErrorMsg");
+          if (jsonErrorMsgEl) {
+            jsonErrorMsgEl.classList.add("hidden");
+          }
+          renderAll();
+          showToast("Đã khôi phục dữ liệu mẫu ngày 27/11/2026", "↺");
+        });
+      }
+
+      const applyJsonBtnEl = document.getElementById("applyJsonBtn");
+      if (applyJsonBtnEl) {
+        applyJsonBtnEl.addEventListener("click", () => {
+          const jsonTextareaEl = document.getElementById("jsonTextarea");
+          const raw = jsonTextareaEl ? jsonTextareaEl.value : "";
+          const errBox = document.getElementById("jsonErrorMsg");
+          try {
+            const parsed = parseGmailOrJsonInput(raw);
+            appState.data = parsed;
+            saveDataToStorage(parsed);
+            appState.expandedOrderIds = new Set(appState.data.orders.slice(0, 3).map(o => o.id));
+            if (errBox) {
+              errBox.className = "hidden text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2";
+              errBox.classList.add("hidden");
+            }
+            closeJsonModal();
+            renderAll();
+            showToast("Đã cập nhật và lưu dữ liệu thành công!", "✅");
+          } catch (err) {
+            if (errBox) {
+              errBox.textContent = "Lỗi xử lý dữ liệu: " + err.message;
+              errBox.className = "text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2";
+              errBox.classList.remove("hidden");
+            }
+          }
+        });
+      }
+
+      setActiveTab("calendar-weather");
+      setPlanMode("both");
+      renderAll();
+    });
+  </script>
+</body>
+</html>
