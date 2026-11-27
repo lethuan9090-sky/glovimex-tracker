@@ -445,6 +445,47 @@
     </section>
 
   </main>
+
+  <!-- MODAL SỬA LINK DỮ LIỆU NGUỒN -->
+  <div id="sourceLinksModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-4 sm:px-5 py-3.5 bg-slate-900 text-white">
+        <div class="flex items-center gap-2">
+          <span>🔗</span>
+          <h3 class="text-sm sm:text-base font-bold">Sửa link dữ liệu nguồn (Google Drive / Sheet)</h3>
+        </div>
+        <button id="closeSourceLinksModalBtn" type="button" class="text-slate-300 hover:text-white text-lg font-bold px-2 cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-4 sm:p-5 space-y-3">
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Dán trực tiếp link thư mục/file Google Drive hoặc Google Sheet thật của từng xưởng vào ô tương ứng bên dưới rồi bấm <strong>✓ Lưu link nguồn</strong> (không cần sửa JSON).
+        </p>
+
+        <div id="sourceLinksEditorList" class="space-y-2.5 max-h-[55vh] overflow-y-auto pr-1">
+          <!-- Render bằng JS -->
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button
+            id="cancelSourceLinksModalBtn"
+            type="button"
+            class="text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 cursor-pointer"
+          >
+            Hủy
+          </button>
+          <button
+            id="saveSourceLinksBtn"
+            type="button"
+            class="text-xs font-bold px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white shadow-sm cursor-pointer"
+          >
+            ✓ Lưu link nguồn
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL NHẬP / DÁN DỮ LIỆU TỪ GMAIL HOẶC JSON -->
   <div id="jsonModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4">
     <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden">
@@ -1216,7 +1257,6 @@
       const mainFactories = ["AN", "LTU", "VNH", "CQ"];
 
       if (sel === "Xưởng lẻ") {
-        // Khớp nếu nhãn xưởng không nằm thuần túy trong 4 xưởng chính
         const parts = lbl.split(",").map(p => p.trim());
         return parts.some(p => p && !mainFactories.includes(p));
       }
@@ -1355,7 +1395,6 @@
       const excerptText = String(payloadObj.rawExcerpt || "");
       const lines = excerptText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
-      // Cập nhật các dòng tiến độ hoặc ghi chú theo khách hàng/xưởng nếu tìm thấy trong rawExcerpt
       const knownCustomers = ["EDGE", "IROVY", "BARCELONA LED", "ASIAN DESIGN HOUSE", "MRS.ALICE", "GR8", "BEACHX PRIVATE LIMITED", "GRUPO", "DIXNEUF"];
       const knownFactories = ["AN", "LTU", "VNH", "CQ", "Hùng TT", "A Cảnh", "A Tước"];
 
@@ -1414,7 +1453,6 @@
         throw new Error("Vui lòng dán nội dung báo cáo từ Gmail hoặc JSON.");
       }
 
-      // 1. Thử parse JSON trực tiếp
       if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
         const parsed = JSON.parse(trimmed);
         if (parsed && Array.isArray(parsed.orders)) {
@@ -1426,7 +1464,6 @@
         throw new Error("JSON cần có trường 'orders' dạng mảng hoặc dữ liệu báo cáo từ Apps Script ('rawExcerpt' / 'reportDate').");
       }
 
-      // 2. Nếu dán HTML từ Gmail, bóc tách text sạch
       let plainText = trimmed;
       if (/<[a-z][\s\S]*>/i.test(trimmed)) {
         const doc = new DOMParser().parseFromString(trimmed, "text/html");
@@ -1471,23 +1508,67 @@
     };
 
     /**
+     * MODAL SỬA LINK DỮ LIỆU NGUỒN
+     */
+    function openSourceLinksModal() {
+      const listContainer = document.getElementById("sourceLinksEditorList");
+      const links = appState.data.sourceLinks || [];
+
+      listContainer.innerHTML = links.map((lnk, idx) => `
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <label for="srcLabel_${idx}" class="text-[11px] font-bold text-slate-700">Tên nút hiển thị #${idx + 1}</label>
+            <span class="text-[10px] text-slate-400">Mở tab mới</span>
+          </div>
+          <input
+            id="srcLabel_${idx}"
+            type="text"
+            value="${String(lnk.label || "").replace(/"/g, "&quot;")}"
+            class="src-label-input w-full text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+          />
+          <label for="srcUrl_${idx}" class="block text-[11px] font-bold text-slate-700 pt-0.5">Đường dẫn (https://...)</label>
+          <input
+            id="srcUrl_${idx}"
+            type="url"
+            value="${String(lnk.url || "").replace(/"/g, "&quot;")}"
+            placeholder="https://drive.google.com/drive/folders/..."
+            class="src-url-input w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+          />
+        </div>
+      `).join("");
+
+      const modal = document.getElementById("sourceLinksModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeSourceLinksModal() {
+      const modal = document.getElementById("sourceLinksModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    /**
      * RENDER CÁC THÀNH PHẦN GIAO DIỆN
      */
     function renderSourceLinksBar() {
       const bar = document.getElementById("sourceLinksBar");
       const links = appState.data.sourceLinks || [];
-      const chips = links.map((lnk, idx) => `
-        <a
-          href="${lnk.url || "#"}"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 font-semibold transition"
-          title="Mở link nguồn ${lnk.label}"
-        >
-          <span>🔗</span>
-          <span>${lnk.label}</span>
-        </a>
-      `).join("");
+      const chips = links.map((lnk) => {
+        const safeUrl = lnk.url && /^https?:\/\//i.test(lnk.url.trim()) ? lnk.url.trim() : "#";
+        return `
+          <a
+            href="${safeUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 font-semibold transition"
+            title="Mở link nguồn ${lnk.label}"
+          >
+            <span>🔗</span>
+            <span>${lnk.label}</span>
+          </a>
+        `;
+      }).join("");
 
       bar.innerHTML = `
         <div class="flex flex-wrap items-center gap-1.5">
@@ -1503,9 +1584,7 @@
         </button>
       `;
 
-      document.getElementById("editSourceLinksBtn").addEventListener("click", () => {
-        openJsonModalWithTabHint("Chỉnh sửa mảng 'sourceLinks' trong JSON để cập nhật đường dẫn Drive/Sheet thực tế.");
-      });
+      document.getElementById("editSourceLinksBtn").addEventListener("click", openSourceLinksModal);
     }
 
     function syncCustomerFilterOptions() {
@@ -1605,8 +1684,8 @@
       const eventsMap = appState.data.calendarEvents || {};
 
       const months = [
-        { year: 2026, monthIndex: 10, title: "📅 THÁNG 11, 2026", daysInMonth: 30, firstDayDow: 0 }, // 01/11/2026 là Chủ Nhật
-        { year: 2026, monthIndex: 11, title: "📅 THÁNG 12, 2026", daysInMonth: 31, firstDayDow: 2 }  // 01/12/2026 là Thứ 3
+        { year: 2026, monthIndex: 10, title: "📅 THÁNG 11, 2026", daysInMonth: 30, firstDayDow: 0 },
+        { year: 2026, monthIndex: 11, title: "📅 THÁNG 12, 2026", daysInMonth: 31, firstDayDow: 2 }
       ];
 
       const dayHeaders = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
@@ -1996,7 +2075,6 @@
 
             return `
               <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
-                <!-- Header từng xưởng + đầy đủ các chỉ số -->
                 <div class="px-3.5 py-2.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-xs font-extrabold text-white px-2.5 py-0.5 rounded-lg" style="background-color:${facColor};">
@@ -2018,7 +2096,6 @@
                   </div>
                 </div>
 
-                <!-- Nội dung Theo dõi đơn hàng, Lưu ý đơn trước & Ghi chú -->
                 <div class="p-3.5 grid grid-cols-1 lg:grid-cols-12 gap-4">
                   <div class="lg:col-span-6">
                     <div class="text-[11px] font-bold uppercase tracking-wider text-blue-900 mb-2 flex items-center gap-1.5">
@@ -2146,7 +2223,6 @@
       const overviewContainer = document.getElementById("weeklyOverviewCards");
       const dailyContainer = document.getElementById("dailyScheduleContainer");
 
-      // 1. Lịch tuần (Tuần này & Tuần tới)
       overviewContainer.innerHTML = (appState.data.weeklyOverview || []).map(wk => {
         const listHtml = (wk.highlights || []).map(item => `
           <div class="flex items-start gap-2.5 py-2 border-b border-slate-100 last:border-none">
@@ -2172,7 +2248,6 @@
         `;
       }).join("");
 
-      // 2. Lịch từng ngày (Thứ 2 - Thứ 6)
       const rows = (appState.data.dailySchedule || []).map(day => {
         const filteredTasks = (day.tasks || []).filter(t => matchesFactoryFilter(t.factory));
         const isToday = day.status === "today";
@@ -2361,10 +2436,6 @@
       modal.classList.add("flex");
     }
 
-    function openJsonModalWithTabHint(hintText) {
-      openJsonModal(hintText);
-    }
-
     function closeJsonModal() {
       const modal = document.getElementById("jsonModal");
       modal.classList.add("hidden");
@@ -2439,6 +2510,34 @@
         });
       }
 
+      const closeSourceLinksModalBtnEl = document.getElementById("closeSourceLinksModalBtn");
+      if (closeSourceLinksModalBtnEl) {
+        closeSourceLinksModalBtnEl.addEventListener("click", closeSourceLinksModal);
+      }
+
+      const cancelSourceLinksModalBtnEl = document.getElementById("cancelSourceLinksModalBtn");
+      if (cancelSourceLinksModalBtnEl) {
+        cancelSourceLinksModalBtnEl.addEventListener("click", closeSourceLinksModal);
+      }
+
+      const saveSourceLinksBtnEl = document.getElementById("saveSourceLinksBtn");
+      if (saveSourceLinksBtnEl) {
+        saveSourceLinksBtnEl.addEventListener("click", () => {
+          const labels = Array.from(document.querySelectorAll(".src-label-input")).map(el => el.value.trim());
+          const urls = Array.from(document.querySelectorAll(".src-url-input")).map(el => el.value.trim());
+
+          appState.data.sourceLinks = labels.map((lbl, i) => ({
+            label: lbl || `Nguồn ${i + 1}`,
+            url: urls[i] || "#"
+          }));
+
+          saveDataToStorage(appState.data);
+          renderSourceLinksBar();
+          closeSourceLinksModal();
+          showToast("Đã cập nhật link dữ liệu nguồn!", "🔗");
+        });
+      }
+
       const openJsonModalBtnEl = document.getElementById("openJsonModalBtn");
       if (openJsonModalBtnEl) {
         openJsonModalBtnEl.addEventListener("click", () => openJsonModal(""));
@@ -2505,7 +2604,6 @@
       setPlanMode("both");
       renderAll();
 
-      // Nếu đã lưu link Apps Script thì tự động đồng bộ ngầm khi mở app
       const savedScriptUrl = loadAppsScriptUrl();
       if (savedScriptUrl) {
         fetchFromAppsScriptUrl(savedScriptUrl, false).catch(() => {
