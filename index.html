@@ -172,7 +172,7 @@
     </div>
   </header>
 
-  <!-- THÔNG BÁO TOAST NHẸ (THAY THẾ ALERT) -->
+  <!-- THÔNG BÁO TOAST NHẸ -->
   <div id="toastBanner" class="fixed bottom-4 right-4 z-50 hidden max-w-sm bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2.5">
     <span id="toastIcon">✅</span>
     <span id="toastText">Đã cập nhật dữ liệu</span>
@@ -236,11 +236,24 @@
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-50 text-purple-800 border border-purple-200">
               <span class="w-2 h-2 rounded-full bg-purple-700"></span> Đóng cont
             </span>
+            <button
+              id="openFullCalendarBtn"
+              type="button"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold shadow-2xs transition cursor-pointer"
+              title="Mở lịch toàn màn hình để xem đầy đủ nội dung sự kiện"
+            >
+              <span>⛶</span>
+              <span>Xem lịch toàn màn hình</span>
+            </button>
           </div>
         </div>
 
         <div id="twoMonthCalendarContainer" class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5">
           <!-- Render bằng JS -->
+        </div>
+
+        <div id="calendarDayDetailBox" class="hidden mt-4 p-3.5 rounded-xl bg-blue-50/80 border border-blue-200 text-xs sm:text-sm">
+          <!-- Render chi tiết sự kiện khi bấm vào ô ngày -->
         </div>
       </div>
 
@@ -283,14 +296,12 @@
           </div>
         </div>
 
-        <!-- Bảng Ma trận tiến độ -->
         <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200">
           <div id="progressMatrixContainer">
             <!-- Render bằng JS -->
           </div>
         </div>
 
-        <!-- Hộp cảnh báo chậm tiến độ -->
         <div id="delayAlertContainer" class="mt-5">
           <!-- Render bằng JS -->
         </div>
@@ -387,7 +398,6 @@
             </p>
           </div>
 
-          <!-- Bộ chuyển chế độ xem Lịch tuần / Lịch từng ngày -->
           <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 self-start sm:self-auto">
             <button
               id="modeBothBtn"
@@ -416,7 +426,6 @@
           </div>
         </div>
 
-        <!-- Khối Lịch tuần (Tuần này & Tuần tới) -->
         <div id="weeklyOverviewBlock" class="mb-6">
           <h3 class="text-sm sm:text-base font-bold text-slate-800 mb-2.5 flex items-center gap-2">
             <span class="w-2 h-5 rounded-full bg-blue-700 inline-block"></span>
@@ -427,14 +436,12 @@
           </div>
         </div>
 
-        <!-- Khối Lịch từng ngày (Thứ 2 - Thứ 6) -->
         <div id="dailyScheduleBlock">
           <h3 class="text-sm sm:text-base font-bold text-slate-800 mb-2.5 flex items-center gap-2">
             <span class="w-2 h-5 rounded-full bg-amber-500 inline-block"></span>
             <span>Lịch từng ngày (Thứ 2 – Thứ 6)</span>
           </h3>
 
-          <!-- Bảng trên màn hình lớn + Thẻ trên mobile -->
           <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200">
             <div id="dailyScheduleContainer">
               <!-- Render bằng JS -->
@@ -445,6 +452,40 @@
     </section>
 
   </main>
+
+  <!-- MODAL LỊCH TOÀN MÀN HÌNH -->
+  <div id="fullCalendarModal" class="fixed inset-0 z-50 hidden flex-col bg-slate-900/75 backdrop-blur-xs p-2 sm:p-4">
+    <div class="bg-white rounded-2xl w-full h-full max-w-[1600px] mx-auto border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 py-3 bg-blue-950 text-white shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="text-lg">📆</span>
+          <div>
+            <h3 class="text-sm sm:text-base font-extrabold tracking-tight">LỊCH ĐI XƯỞNG THÁNG 11 & THÁNG 12 / 2026 (TOÀN MÀN HÌNH)</h3>
+            <p class="text-[11px] text-blue-200">Hiển thị đầy đủ nội dung các sự kiện Inline, Final, Đóng cont theo từng ngày</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-500/20 text-sky-200 border border-sky-400/30 text-[11px] font-semibold">Inline</span>
+          <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/20 text-rose-200 border border-rose-400/30 text-[11px] font-semibold">Final</span>
+          <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/20 text-purple-200 border border-purple-400/30 text-[11px] font-semibold">Đóng cont</span>
+          <button
+            id="closeFullCalendarModalBtn"
+            type="button"
+            class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 transition cursor-pointer"
+          >
+            <span>✕</span>
+            <span>Thu nhỏ (ESC)</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="fullCalendarModalBody" class="flex-1 overflow-y-auto p-3 sm:p-5 bg-slate-50">
+        <div id="fullTwoMonthCalendarContainer" class="grid grid-cols-1 2xl:grid-cols-2 gap-4 sm:gap-6">
+          <!-- Render bằng JS -->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL SỬA LINK DỮ LIỆU NGUỒN -->
   <div id="sourceLinksModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4">
@@ -558,7 +599,7 @@
       reportDate: "Thứ Sáu, ngày 27/11/2026",
       todayISO: "2026-11-27",
       sourceLinks: [
-        { label: "AN - Share", url: "https://docs.google.com/spreadsheets/d/1AwMQ-LMv0H0FJXj8t5lTaM_6LvgS8rn0AnuT2VQJvJU/edit?usp=drive_link" },
+       { label: "AN - Share", url: "https://docs.google.com/spreadsheets/d/1AwMQ-LMv0H0FJXj8t5lTaM_6LvgS8rn0AnuT2VQJvJU/edit?usp=drive_link" },
         { label: "VNH - Share", url: "https://docs.google.com/spreadsheets/d/1XWX0tK5jlzQosCe0vb9ERcsxF3WIh8FwYIGW_N-Bdbk/edit?usp=drive_link" },
         { label: "LTU - Share", url: "https://docs.google.com/spreadsheets/d/138XMiod5vhoAE9tyoIb7MbQKDBdFgacOxyWtOGXX0-Y/edit?usp=drive_link" },
         { label: "CQ - Share", url: "https://docs.google.com/spreadsheets/d/1XxMKZg8b2lqkznPOYKo8H3V5jGoOUmsz4x7CrQXHI5s/edit?usp=drive_link" },
@@ -1331,7 +1372,6 @@
   }
 }
 
-
     function saveAppsScriptUrl(urlStr) {
       try {
         if (urlStr) {
@@ -1679,8 +1719,7 @@
     /**
      * RENDER TAB 1: LỊCH 2 THÁNG & DỰ BÁO THỜI TIẾT
      */
-    function renderCalendarAndWeather() {
-      const calContainer = document.getElementById("twoMonthCalendarContainer");
+    function buildTwoMonthCalendarMarkup(isFullScreen = false) {
       const todayISO = appState.data.todayISO || "2026-11-27";
       const eventsMap = appState.data.calendarEvents || {};
 
@@ -1690,8 +1729,12 @@
       ];
 
       const dayHeaders = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+      const minCellHeight = isFullScreen ? "min-h-[96px] sm:min-h-[118px]" : "min-h-[68px] sm:min-h-[82px]";
+      const eventTextClass = isFullScreen
+        ? "mt-1 text-[10px] sm:text-[11px] font-bold text-white px-1.5 py-1 rounded leading-snug whitespace-normal break-words shadow-2xs"
+        : "mt-0.5 text-[8.5px] sm:text-[9.5px] font-bold text-white px-1 py-0.5 rounded leading-[1.15] whitespace-normal break-words shadow-2xs";
 
-      calContainer.innerHTML = months.map(m => {
+      return months.map(m => {
         let cellsHtml = "";
         const totalSlots = Math.ceil((m.firstDayDow + m.daysInMonth) / 7) * 7;
 
@@ -1701,7 +1744,7 @@
           const isWeekend = colDow === 0 || colDow === 6;
 
           if (dayNum < 1 || dayNum > m.daysInMonth) {
-            cellsHtml += `<div class="min-h-[68px] sm:min-h-[82px] bg-slate-50/70 border border-slate-200/70 rounded-lg p-1"></div>`;
+            cellsHtml += `<div class="${minCellHeight} bg-slate-50/70 border border-slate-200/70 rounded-lg p-1"></div>`;
             continue;
           }
 
@@ -1714,7 +1757,7 @@
           const dayEvents = (eventsMap[dateISO] || []).filter(ev => matchesFactoryFilter(ev.factory));
           const hasEvents = dayEvents.length > 0;
 
-          let boxClass = "min-h-[68px] sm:min-h-[82px] border rounded-lg p-1 sm:p-1.5 flex flex-col justify-between transition ";
+          let boxClass = `${minCellHeight} border rounded-lg p-1 sm:p-1.5 flex flex-col justify-between transition `;
           if (isToday) {
             boxClass += "bg-amber-50/90 border-2 border-red-600 shadow-xs";
           } else if (isWeekend) {
@@ -1739,7 +1782,7 @@
 
           const eventsHtml = dayEvents.map(ev => `
             <div
-              class="mt-1 text-[10px] sm:text-[11px] font-bold text-white px-1.5 py-0.5 rounded leading-tight truncate shadow-2xs"
+              class="${eventTextClass}"
               style="background-color: ${ev.color || "#1d4ed8"};"
               title="${ev.title}"
             >
@@ -1748,12 +1791,15 @@
           `).join("");
 
           cellsHtml += `
-            <div class="${boxClass}">
-              <div class="flex items-center justify-between gap-1">
-                ${isToday ? `<span class="text-[9px] font-extrabold uppercase bg-red-600 text-white px-1.5 py-0.5 rounded">Hôm nay</span>` : `<span></span>`}
+            <div
+              data-cal-date="${dateISO}"
+              class="${boxClass} ${hasEvents ? "cursor-pointer hover:ring-2 hover:ring-blue-400" : ""}"
+            >
+              <div class="flex items-center justify-between gap-0.5">
+                ${isToday ? `<span class="text-[8px] font-extrabold uppercase bg-red-600 text-white px-1 py-0.5 rounded leading-none">Hôm nay</span>` : `<span></span>`}
                 <span class="${numClass}">${dayNum}</span>
               </div>
-              <div class="mt-0.5">${eventsHtml}</div>
+              <div class="mt-0.5 space-y-0.5">${eventsHtml}</div>
             </div>
           `;
         }
@@ -1774,6 +1820,90 @@
           </div>
         `;
       }).join("");
+    }
+
+    function openFullCalendarModal() {
+      const fullContainer = document.getElementById("fullTwoMonthCalendarContainer");
+      if (fullContainer) {
+        fullContainer.innerHTML = buildTwoMonthCalendarMarkup(true);
+      }
+      const modal = document.getElementById("fullCalendarModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closeFullCalendarModal() {
+      const modal = document.getElementById("fullCalendarModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function renderCalendarAndWeather() {
+      const calContainer = document.getElementById("twoMonthCalendarContainer");
+      const eventsMap = appState.data.calendarEvents || {};
+
+      calContainer.innerHTML = buildTwoMonthCalendarMarkup(false);
+
+      const fullModal = document.getElementById("fullCalendarModal");
+      if (fullModal && !fullModal.classList.contains("hidden")) {
+        const fullContainer = document.getElementById("fullTwoMonthCalendarContainer");
+        if (fullContainer) {
+          fullContainer.innerHTML = buildTwoMonthCalendarMarkup(true);
+        }
+      }
+
+      const detailBox = document.getElementById("calendarDayDetailBox");
+      if (detailBox) {
+        detailBox.classList.add("hidden");
+        detailBox.innerHTML = "";
+      }
+
+      calContainer.querySelectorAll("[data-cal-date]").forEach(cell => {
+        cell.addEventListener("click", () => {
+          const dateISO = cell.dataset.calDate;
+          const matchedEvents = (eventsMap[dateISO] || []).filter(ev => matchesFactoryFilter(ev.factory));
+          if (matchedEvents.length === 0) {
+            openFullCalendarModal();
+            return;
+          }
+          if (!detailBox) return;
+
+          const parts = dateISO.split("-");
+          const formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateISO;
+
+          detailBox.innerHTML = `
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div class="font-extrabold text-blue-950">📌 Chi tiết lịch đi xưởng ngày ${formattedDate}</div>
+              <div class="flex items-center gap-2">
+                <button type="button" id="expandFromDetailBtn" class="text-xs font-bold text-blue-800 hover:text-blue-950 bg-white px-2.5 py-0.5 rounded border border-blue-200 cursor-pointer">⛶ Phóng to toàn bộ lịch</button>
+                <button type="button" id="closeCalDetailBtn" class="text-xs font-bold text-slate-500 hover:text-slate-800 px-2 py-0.5 rounded cursor-pointer">✕ Đóng</button>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              ${matchedEvents.map(ev => `
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-2xs" style="background-color: ${ev.color || "#1d4ed8"};">
+                  ${ev.title}
+                </span>
+              `).join("")}
+            </div>
+          `;
+          detailBox.classList.remove("hidden");
+
+          const expandBtn = document.getElementById("expandFromDetailBtn");
+          if (expandBtn) {
+            expandBtn.addEventListener("click", openFullCalendarModal);
+          }
+
+          const closeBtn = document.getElementById("closeCalDetailBtn");
+          if (closeBtn) {
+            closeBtn.addEventListener("click", () => detailBox.classList.add("hidden"));
+          }
+        });
+      });
 
       // Render Thời tiết 5 ngày tới
       const weatherContainer = document.getElementById("weatherForecastContainer");
@@ -2510,6 +2640,22 @@
           window.print();
         });
       }
+
+      const openFullCalendarBtnEl = document.getElementById("openFullCalendarBtn");
+      if (openFullCalendarBtnEl) {
+        openFullCalendarBtnEl.addEventListener("click", openFullCalendarModal);
+      }
+
+      const closeFullCalendarModalBtnEl = document.getElementById("closeFullCalendarModalBtn");
+      if (closeFullCalendarModalBtnEl) {
+        closeFullCalendarModalBtnEl.addEventListener("click", closeFullCalendarModal);
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeFullCalendarModal();
+        }
+      });
 
       const closeSourceLinksModalBtnEl = document.getElementById("closeSourceLinksModalBtn");
       if (closeSourceLinksModalBtnEl) {
