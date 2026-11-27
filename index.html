@@ -582,11 +582,11 @@
      * (sau khi Gmail thông báo trong khung 6h00 - 7h00 sáng).
      */
     function isWeekdayMorningSyncWindow(nowDate = new Date()) {
-      const dayOfWeek = nowDate.getDay(); // 1..5 là Thứ 2 .. Thứ 6
+      const dayOfWeek = nowDate.getDay();
       if (dayOfWeek < 1 || dayOfWeek > 5) return false;
       const minutesFromMidnight = nowDate.getHours() * 60 + nowDate.getMinutes();
-      const startMinutes = 7 * 60 + 30; // 07:30
-      const endMinutes = 8 * 60;       // 08:00
+      const startMinutes = 7 * 60 + 30;
+      const endMinutes = 8 * 60;
       return minutesFromMidnight >= startMinutes && minutesFromMidnight <= endMinutes;
     }
 
@@ -598,7 +598,7 @@
       const dayOfWeek = nowDate.getDay();
       if (dayOfWeek < 1 || dayOfWeek > 5) return false;
       const minutesFromMidnight = nowDate.getHours() * 60 + nowDate.getMinutes();
-      const startMinutes = 7 * 60 + 30; // 07:30
+      const startMinutes = 7 * 60 + 30;
       if (minutesFromMidnight < startMinutes) return false;
 
       const todayKey = formatLocalDateKey(nowDate);
@@ -630,7 +630,6 @@
         { label: "LTU - Share", url: "https://drive.google.com/drive/folders/LTU-Share" },
         { label: "CQ - Share", url: "https://drive.google.com/drive/folders/CQ-Share" },
         { label: "Xưởng lẻ", url: "https://drive.google.com/drive/folders/Xuong-le" }
-
       ],
       factories: ["AN", "LTU", "VNH", "CQ", "A.CẢNH", "Hùng TT", "A Cảnh", "A Tước"],
       factoryColors: {
@@ -764,10 +763,7 @@
                 { text: "Nghĩa báo ngày 28/11 đủ hàng về xưởng.", highlight: true }
               ],
               prevNotes: "AN Đơn hàng tình trạng bị xuống màu vàng nhiều và bị mốc đen.",
-              notes: "1) Shipping mark sale gửi sau..
-2) Hàng đóng chồng lên nhau, bọc giấy+túi nilon. Thùng gấp gọn chuyển kèm cont.
-3) Đóng cont xong kẹp chì tạm.
-4) Chốt sớm CBM để đặt thêm hàng."
+              notes: "1) Shipping mark sale gửi sau..\n2) Hàng đóng chồng lên nhau, bọc giấy+túi nilon. Thùng gấp gọn chuyển kèm cont.\n3) Đóng cont xong kẹp chì tạm.\n4) Chốt sớm CBM để đặt thêm hàng."
             }
           ]
         },
@@ -800,11 +796,7 @@
                 { text: "23/11: đủ 2 mã đèn tăm và tua rua, mã đèn nấm được 1500 cái.", highlight: true }
               ],
               prevNotes: "-",
-              notes: "1) Chia 3 lần đóng cont, 3cont/lần • Lần 1: 12/12/2026 • Lần 2: 27/12/2026 • Lần 3: 11/01/2027
-2) Tag giấy nâu 10x6cm cho LM172,LM179,LM180.
-3) Dán 1 decal A4 các mã LM 172,LM179,LM180.
-4) Mã LM178 đóng 1pcs/ctn, in shipping mark A4 lên 1 mặt, không cần treo tag.
-5) Sau khi đóng lần 2, chốt lại số lượng thừa thiếu LM178 để sx thêm bớt."
+              notes: "1) Chia 3 lần đóng cont, 3cont/lần • Lần 1: 12/12/2026 • Lần 2: 27/12/2026 • Lần 3: 11/01/2027\n2) Tag giấy nâu 10x6cm cho LM172,LM179,LM180.\n3) Dán 1 decal A4 các mã LM 172,LM179,LM180.\n4) Mã LM178 đóng 1pcs/ctn, in shipping mark A4 lên 1 mặt, không cần treo tag.\n5) Sau khi đóng lần 2, chốt lại số lượng thừa thiếu LM178 để sx thêm bớt."
             },
             {
               factory: "CQ",
@@ -1406,7 +1398,6 @@
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.orders)) {
             const merged = normalizeOrderFlags({ ...JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA)), ...parsed });
-            // Bảo đảm đơn EDGE luôn có đúng cấu trúc các mục theo báo cáo chuẩn
             const edgeOrder = merged.orders.find(o => o.id === "ORD-EDGE" || o.customer === "EDGE");
             if (edgeOrder) {
               const defaultEdge = DEFAULT_REPORT_DATA.orders.find(o => o.id === "ORD-EDGE");
@@ -1463,7 +1454,6 @@
 
     /**
      * PHÂN TÍCH NỘI DUNG DÁN TỪ GMAIL (JSON, HTML EMAIL HOẶC VĂN BẢN)
-     * Giữ nguyên link thực tế 4 xưởng, tách riêng cảnh báo chậm tiến độ, theo dõi đơn hàng, lưu ý đơn trước & ghi chú.
      */
     function parseGmailOrJsonInput(rawText) {
       const trimmed = (rawText || "").trim();
@@ -1475,7 +1465,6 @@
         ? JSON.parse(JSON.stringify(appState.data.sourceLinks))
         : JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA.sourceLinks));
 
-      // 1. Thử parse JSON trực tiếp
       if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
         const parsed = JSON.parse(trimmed);
         if (!parsed || !Array.isArray(parsed.orders)) {
@@ -1491,7 +1480,6 @@
       const nextData = JSON.parse(JSON.stringify(DEFAULT_REPORT_DATA));
       nextData.sourceLinks = preservedLinks;
 
-      // 2. Nếu có HTML từ Gmail, parse cấu trúc từng bảng/khối để tách đúng cột & mục
       if (/<[a-z][\s\S]*>/i.test(trimmed)) {
         const doc = new DOMParser().parseFromString(trimmed, "text/html");
         const bodyText = (doc.body && doc.body.innerText) ? doc.body.innerText : "";
@@ -1500,14 +1488,12 @@
           nextData.reportDate = dateMatch[1];
         }
 
-        // Reset cảnh báo chậm tiến độ trước khi đọc từ khối cảnh báo báo cáo
         nextData.orders.forEach(o => {
           o.delayAlerts = [];
           o.delaySummary = "-";
           o.isDelayed = false;
         });
 
-        // Đọc khối cảnh báo chậm tiến độ sản xuất (chỉ thuộc mục tiến độ đơn hàng)
         const alertBoxes = Array.from(doc.querySelectorAll("div")).filter(el =>
           /Cảnh báo chậm tiến độ sản xuất/i.test(el.textContent || "") && el.querySelectorAll("li").length > 0
         );
@@ -1544,7 +1530,6 @@
           });
         });
 
-        // Đọc các bảng theo dõi đơn hàng (có cột "Theo dõi đơn hàng", "Lưu ý đơn trước", "Ghi chú")
         const tables = Array.from(doc.querySelectorAll("table"));
         tables.forEach(tbl => {
           const headerText = (tbl.rows[0] && tbl.rows[0].innerText) ? tbl.rows[0].innerText : "";
@@ -1592,8 +1577,7 @@
                 } else {
                   const plainTr = (trackingCell.innerText || "").trim();
                   matchedDetail.tracking = plainTr && plainTr !== "-"
-                    ? cleanTrackingLines(plainTr.split(/
-+/))
+                    ? cleanTrackingLines(plainTr.split(/\r?\n+/))
                     : [];
                 }
               }
@@ -1616,17 +1600,12 @@
         return normalizeOrderFlags(nextData);
       }
 
-      // 3. Nếu dán văn bản thuần túy
       const dateMatch = trimmed.match(/(Thứ\s+[A-Za-zÀ-ỹ]+,\s*ngày\s*\d{1,2}\/\d{1,2}\/\d{4})/i);
       if (dateMatch) {
         nextData.reportDate = dateMatch[1];
       }
 
-      const alertLineMatch = trimmed.match(/Xưởng\s+([A-Za-zÀ-ỹ.\s]+?)\s*\(([^)]+)\)\s*\(([^)]+)\)\s*\[T-\s*=\s*([^\]]+)\]\s*:\s*([^
-
-➔]+)[\s\S]*?(?:➔\s*([^
-
-]+))?/i);
+      const alertLineMatch = trimmed.match(/Xưởng\s+([A-Za-zÀ-ỹ.\s]+?)\s*\(([^)]+)\)\s*\(([^)]+)\)\s*\[T-\s*=\s*([^\]]+)\]\s*:\s*([^\r\n➔]+)[\s\S]*?(?:➔\s*([^\r\n]+))?/i);
       if (alertLineMatch) {
         nextData.orders.forEach(o => {
           o.delayAlerts = [];
@@ -1728,7 +1707,7 @@
     function renderSourceLinksBar() {
       const bar = document.getElementById("sourceLinksBar");
       const links = appState.data.sourceLinks || [];
-      const chips = links.map((lnk, idx) => `
+      const chips = links.map((lnk) => `
         <a
           href="${lnk.url || "#"}"
           target="_blank"
@@ -1857,8 +1836,8 @@
       const eventsMap = appState.data.calendarEvents || {};
 
       const months = [
-        { year: 2026, monthIndex: 10, title: "📅 THÁNG 11, 2026", daysInMonth: 30, firstDayDow: 0 }, // 01/11/2026 là Chủ Nhật
-        { year: 2026, monthIndex: 11, title: "📅 THÁNG 12, 2026", daysInMonth: 31, firstDayDow: 2 }  // 01/12/2026 là Thứ 3
+        { year: 2026, monthIndex: 10, title: "📅 THÁNG 11, 2026", daysInMonth: 30, firstDayDow: 0 },
+        { year: 2026, monthIndex: 11, title: "📅 THÁNG 12, 2026", daysInMonth: 31, firstDayDow: 2 }
       ];
 
       const dayHeaders = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
@@ -1947,7 +1926,6 @@
         `;
       }).join("");
 
-      // Render Thời tiết 5 ngày tới
       const weatherContainer = document.getElementById("weatherForecastContainer");
       const locations = (appState.data.weatherLocations || [])
         .map(loc => {
@@ -2062,7 +2040,7 @@
         `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-200 border-b border-r border-slate-200 min-w-[115px]">Giao dự kiến</th>`,
         `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-100 border-b border-r border-slate-200 min-w-[130px]">Xưởng sản xuất</th>`,
         `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-300 border-b border-r border-slate-200 min-w-[82px]">Đi Cont</th>`,
-        `<th class="p-2.5 text-center font-bold text-slate-900 bg-yellow-200 border-b border-200 min-w-[64px]">Còn lại</th>`
+        `<th class="p-2.5 text-center font-bold text-slate-900 bg-yellow-200 border-b border-slate-200 min-w-[64px]">Còn lại</th>`
       ].join("");
 
       const bodyRows = filteredOrders.map(o => {
@@ -2119,7 +2097,6 @@
         </table>
       `;
 
-      // Hộp cảnh báo chậm tiến độ (khớp chính xác báo cáo từ xưởng trong Gmail)
       const delayedOrders = filteredOrders.filter(o => o.isDelayed && o.delayAlerts && o.delayAlerts.length > 0);
       if (delayedOrders.length === 0) {
         alertContainer.innerHTML = `
@@ -2173,7 +2150,7 @@
     }
 
     /**
-     * RENDER TAB 3: PHẦN II - THEO DÕI ĐƠN HÀNG CỦA QC (2 NHÓM: TRỄ HẠN & TRONG TẦM KIỂM SOÁT)
+     * RENDER TAB 3: PHẦN II - THEO DÕI ĐƠN HÀNG CỦA QC
      */
     function renderOrderTrackingList() {
       const container = document.getElementById("orderTrackingListContainer");
@@ -2256,7 +2233,6 @@
 
             return `
               <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
-                <!-- Header từng xưởng + đầy đủ các chỉ số -->
                 <div class="px-3.5 py-2.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-xs font-extrabold text-white px-2.5 py-0.5 rounded-lg" style="background-color:${facColor};">
@@ -2278,7 +2254,6 @@
                   </div>
                 </div>
 
-                <!-- Nội dung Theo dõi đơn hàng, Lưu ý đơn trước & Ghi chú -->
                 <div class="p-3.5 grid grid-cols-1 lg:grid-cols-12 gap-4">
                   <div class="lg:col-span-6">
                     <div class="text-[11px] font-bold uppercase tracking-wider text-blue-900 mb-2 flex items-center gap-1.5">
@@ -2406,7 +2381,6 @@
       const overviewContainer = document.getElementById("weeklyOverviewCards");
       const dailyContainer = document.getElementById("dailyScheduleContainer");
 
-      // 1. Lịch tuần (Tuần này & Tuần tới)
       overviewContainer.innerHTML = (appState.data.weeklyOverview || []).map(wk => {
         const listHtml = (wk.highlights || []).map(item => `
           <div class="flex items-start gap-2.5 py-2 border-b border-slate-100 last:border-none">
@@ -2432,7 +2406,6 @@
         `;
       }).join("");
 
-      // 2. Lịch từng ngày (Thứ 2 - Thứ 6)
       const rows = (appState.data.dailySchedule || []).map(day => {
         const filteredTasks = (day.tasks || []).filter(t => matchesFactoryFilter(t.factory));
         const isToday = day.status === "today";
@@ -2764,15 +2737,12 @@
       setPlanMode("both");
       renderAll();
 
-      // Kiểm tra đồng bộ tự động ngay khi mở trang (nếu trong khung 7h30-8h00 T2-T6 hoặc cần bắt kịp sáng ngày làm việc)
       runScheduledAutoSync("mount");
 
-      // Kiểm tra lại mỗi 60 giây để chạy đúng khung 7h30 - 8h00 sáng từ Thứ 2 đến Thứ 6
       setInterval(() => {
         runScheduledAutoSync("interval");
       }, 60 * 1000);
 
-      // Khi quay lại tab/mở lại trang trên máy hoặc điện thoại
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
           runScheduledAutoSync("visibility");
