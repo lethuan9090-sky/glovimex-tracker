@@ -558,11 +558,11 @@
       reportDate: "Thứ Sáu, ngày 27/11/2026",
       todayISO: "2026-11-27",
       sourceLinks: [
-        { label: "AN - Share", url: "https://drive.google.com/drive/folders/AN-Share" },
-        { label: "VNH - Share", url: "https://drive.google.com/drive/folders/VNH-Share" },
-        { label: "LTU - Share", url: "https://drive.google.com/drive/folders/LTU-Share" },
-        { label: "CQ - Share", url: "https://drive.google.com/drive/folders/CQ-Share" },
-        { label: "Xưởng lẻ", url: "https://drive.google.com/drive/folders/Xuong-le" }
+        { label: "AN - Share", url: "https://docs.google.com/spreadsheets/d/1AwMQ-LMv0H0FJXj8t5lTaM_6LvgS8rn0AnuT2VQJvJU/edit?usp=drive_link" },
+        { label: "VNH - Share", url: "https://docs.google.com/spreadsheets/d/1XWX0tK5jlzQosCe0vb9ERcsxF3WIh8FwYIGW_N-Bdbk/edit?usp=drive_link" },
+        { label: "LTU - Share", url: "https://docs.google.com/spreadsheets/d/138XMiod5vhoAE9tyoIb7MbQKDBdFgacOxyWtOGXX0-Y/edit?usp=drive_link" },
+        { label: "CQ - Share", url: "https://docs.google.com/spreadsheets/d/1XxMKZg8b2lqkznPOYKo8H3V5jGoOUmsz4x7CrQXHI5s/edit?usp=drive_link" },
+        { label: "Xưởng lẻ", url: "https://docs.google.com/spreadsheets/d/1NR9nNf7oNxP6iFWpCiLBXRmBNIkKkZLx7BIz4YpFUZQ/edit?usp=drive_link" }
       ],
       factories: ["AN", "LTU", "VNH", "CQ", "A.CẢNH", "Hùng TT", "A Cảnh", "A Tước"],
       factoryColors: {
@@ -1323,13 +1323,14 @@
       }
     }
 
-    function loadAppsScriptUrl() {
-      try {
-        return localStorage.getItem(APPS_SCRIPT_URL_KEY) || "";
-      } catch (e) {
-        return "";
-      }
-    }
+   function loadAppsScriptUrl() {
+  try {
+    return localStorage.getItem(APPS_SCRIPT_URL_KEY) || "DÁN_LINK_EXEC_CỦA_BẠN_VÀO_ĐÂY";
+  } catch (e) {
+    return "DÁN_LINK_EXEC_CỦA_BẠN_VÀO_ĐÂY";
+  }
+}
+
 
     function saveAppsScriptUrl(urlStr) {
       try {
