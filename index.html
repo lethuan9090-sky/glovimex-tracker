@@ -88,7 +88,7 @@
           </div>
         </div>
 
-        <!-- Hành động nhanh: Lọc xưởng, Dán từ Gmail & In báo cáo -->
+        <!-- Hành động nhanh: Lọc xưởng, Cập nhật ngay, Dán từ Gmail & In báo cáo -->
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <select
             id="factoryFilter"
@@ -102,6 +102,17 @@
             <option value="CQ">CQ (Kim Sơn, NB)</option>
             <option value="Xưởng lẻ">Xưởng lẻ / Khác</option>
           </select>
+
+          <button
+            id="manualSyncNowBtn"
+            type="button"
+            class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold bg-teal-700 hover:bg-teal-800 active:scale-[0.99] text-white px-3 py-2 rounded-xl shadow-sm transition cursor-pointer"
+            title="Tải dữ liệu báo cáo mới nhất từ Google Apps Script ngay bây giờ"
+          >
+            <span>🔄</span>
+            <span class="hidden sm:inline">Cập nhật ngay</span>
+            <span class="sm:hidden">Cập nhật</span>
+          </button>
 
           <button
             id="openJsonModalBtn"
@@ -479,7 +490,7 @@
             </button>
           </div>
           <p class="text-[11px] text-slate-500">
-            Tự động đồng bộ: <strong>7h30 – 8h00 sáng (Thứ 2 – Thứ 6)</strong> sau khi Gmail báo cáo (6h00 – 7h00).
+            Tự động đồng bộ: <strong>7h30 – 8h00 sáng (Thứ 2 – Thứ 6)</strong> sau khi Gmail báo cáo (6h00 – 7h00), hoặc bấm <strong>Cập nhật ngay</strong> bất cứ lúc nào.
           </p>
         </div>
 
@@ -614,11 +625,11 @@
       reportDate: "Thứ Sáu, ngày 27/11/2026",
       todayISO: "2026-11-27",
       sourceLinks: [
-        { label: "AN - Share", url: "https://docs.google.com/spreadsheets/d/1AwMQ-LMv0H0FJXj8t5lTaM_6LvgS8rn0AnuT2VQJvJU/edit?usp=drive_link" },
-        { label: "VNH - Share", url: "https://docs.google.com/spreadsheets/d/1XWX0tK5jlzQosCe0vb9ERcsxF3WIh8FwYIGW_N-Bdbk/edit?usp=drive_link" },
-        { label: "LTU - Share", url: "https://docs.google.com/spreadsheets/d/138XMiod5vhoAE9tyoIb7MbQKDBdFgacOxyWtOGXX0-Y/edit?usp=drive_link" },
-        { label: "CQ - Share", url: "https://docs.google.com/spreadsheets/d/1XxMKZg8b2lqkznPOYKo8H3V5jGoOUmsz4x7CrQXHI5s/edit?usp=drive_link" },
-        { label: "Xưởng lẻ", url: "https://docs.google.com/spreadsheets/d/1NR9nNf7oNxP6iFWpCiLBXRmBNIkKkZLx7BIz4YpFUZQ/edit?usp=drive_link" }
+            { label: "AN - Share", url: "https://drive.google.com/drive/folders/AN-Share" },
+        { label: "VNH - Share", url: "https://drive.google.com/drive/folders/VNH-Share" },
+        { label: "LTU - Share", url: "https://drive.google.com/drive/folders/LTU-Share" },
+        { label: "CQ - Share", url: "https://drive.google.com/drive/folders/CQ-Share" },
+        { label: "Xưởng lẻ", url: "https://drive.google.com/drive/folders/Xuong-le" }
 
       ],
       factories: ["AN", "LTU", "VNH", "CQ", "A.CẢNH", "Hùng TT", "A Cảnh", "A Tước"],
@@ -753,7 +764,10 @@
                 { text: "Nghĩa báo ngày 28/11 đủ hàng về xưởng.", highlight: true }
               ],
               prevNotes: "AN Đơn hàng tình trạng bị xuống màu vàng nhiều và bị mốc đen.",
-              notes: "1) Shipping mark sale gửi sau..\n2) Hàng đóng chồng lên nhau, bọc giấy+túi nilon. Thùng gấp gọn chuyển kèm cont.\n3) Đóng cont xong kẹp chì tạm.\n4) Chốt sớm CBM để đặt thêm hàng."
+              notes: "1) Shipping mark sale gửi sau..
+2) Hàng đóng chồng lên nhau, bọc giấy+túi nilon. Thùng gấp gọn chuyển kèm cont.
+3) Đóng cont xong kẹp chì tạm.
+4) Chốt sớm CBM để đặt thêm hàng."
             }
           ]
         },
@@ -786,7 +800,11 @@
                 { text: "23/11: đủ 2 mã đèn tăm và tua rua, mã đèn nấm được 1500 cái.", highlight: true }
               ],
               prevNotes: "-",
-              notes: "1) Chia 3 lần đóng cont, 3cont/lần • Lần 1: 12/12/2026 • Lần 2: 27/12/2026 • Lần 3: 11/01/2027\n2) Tag giấy nâu 10x6cm cho LM172,LM179,LM180.\n3) Dán 1 decal A4 các mã LM 172,LM179,LM180.\n4) Mã LM178 đóng 1pcs/ctn, in shipping mark A4 lên 1 mặt, không cần treo tag.\n5) Sau khi đóng lần 2, chốt lại số lượng thừa thiếu LM178 để sx thêm bớt."
+              notes: "1) Chia 3 lần đóng cont, 3cont/lần • Lần 1: 12/12/2026 • Lần 2: 27/12/2026 • Lần 3: 11/01/2027
+2) Tag giấy nâu 10x6cm cho LM172,LM179,LM180.
+3) Dán 1 decal A4 các mã LM 172,LM179,LM180.
+4) Mã LM178 đóng 1pcs/ctn, in shipping mark A4 lên 1 mặt, không cần treo tag.
+5) Sau khi đóng lần 2, chốt lại số lượng thừa thiếu LM178 để sx thêm bớt."
             },
             {
               factory: "CQ",
@@ -1574,7 +1592,8 @@
                 } else {
                   const plainTr = (trackingCell.innerText || "").trim();
                   matchedDetail.tracking = plainTr && plainTr !== "-"
-                    ? cleanTrackingLines(plainTr.split(/\n+/))
+                    ? cleanTrackingLines(plainTr.split(/
++/))
                     : [];
                 }
               }
@@ -1603,7 +1622,11 @@
         nextData.reportDate = dateMatch[1];
       }
 
-      const alertLineMatch = trimmed.match(/Xưởng\s+([A-Za-zÀ-ỹ.\s]+?)\s*\(([^)]+)\)\s*\(([^)]+)\)\s*\[T-\s*=\s*([^\]]+)\]\s*:\s*([^\n\r➔]+)[\s\S]*?(?:➔\s*([^\n\r]+))?/i);
+      const alertLineMatch = trimmed.match(/Xưởng\s+([A-Za-zÀ-ỹ.\s]+?)\s*\(([^)]+)\)\s*\(([^)]+)\)\s*\[T-\s*=\s*([^\]]+)\]\s*:\s*([^
+
+➔]+)[\s\S]*?(?:➔\s*([^
+
+]+))?/i);
       if (alertLineMatch) {
         nextData.orders.forEach(o => {
           o.delayAlerts = [];
@@ -2039,7 +2062,7 @@
         `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-200 border-b border-r border-slate-200 min-w-[115px]">Giao dự kiến</th>`,
         `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-100 border-b border-r border-slate-200 min-w-[130px]">Xưởng sản xuất</th>`,
         `<th class="p-2.5 text-center font-bold text-slate-900 bg-amber-300 border-b border-r border-slate-200 min-w-[82px]">Đi Cont</th>`,
-        `<th class="p-2.5 text-center font-bold text-slate-900 bg-yellow-200 border-b border-slate-200 min-w-[64px]">Còn lại</th>`
+        `<th class="p-2.5 text-center font-bold text-slate-900 bg-yellow-200 border-b border-200 min-w-[64px]">Còn lại</th>`
       ].join("");
 
       const bodyRows = filteredOrders.map(o => {
@@ -2601,6 +2624,28 @@
       if (printReportBtnEl) {
         printReportBtnEl.addEventListener("click", () => {
           window.print();
+        });
+      }
+
+      const manualSyncNowBtnEl = document.getElementById("manualSyncNowBtn");
+      if (manualSyncNowBtnEl) {
+        manualSyncNowBtnEl.addEventListener("click", async () => {
+          const execUrl = loadAppsScriptUrl();
+          if (!execUrl || execUrl === DEFAULT_APPS_SCRIPT_PLACEHOLDER) {
+            openJsonModal("Vui lòng dán link Web App Google Apps Script (/exec) trước khi cập nhật.");
+            return;
+          }
+
+          manualSyncNowBtnEl.disabled = true;
+          const oldHtml = manualSyncNowBtnEl.innerHTML;
+          manualSyncNowBtnEl.innerHTML = `<span>⏳</span><span class="hidden sm:inline">Đang tải...</span>`;
+
+          try {
+            await syncFromAppsScriptUrl(execUrl, { silent: false, markTodaySlot: true });
+          } finally {
+            manualSyncNowBtnEl.disabled = false;
+            manualSyncNowBtnEl.innerHTML = oldHtml;
+          }
         });
       }
 
